@@ -15,6 +15,7 @@ import { StyledList } from "@/app/components/generative/styled-list";
 import { ComparisonCard } from "@/app/components/generative/comparison-card";
 import { StepsGuide } from "@/app/components/generative/steps-guide";
 import { QuoteCard } from "@/app/components/generative/quote-card";
+import { PhaseIndicator } from "@/app/components/chat/phase-indicator";
 
 type AnyMessage = {
   id: string;
@@ -200,6 +201,20 @@ function renderAssistantPart(
 ): React.ReactNode {
   const type = part.type;
 
+  // フェーズインジケーター（検索中…、UI生成中…）
+  if (type === "data-phase" && part.data && typeof part.data === "object") {
+    const data = part.data as {
+      phase?: "searching" | "generating-ui" | "complete";
+      label?: string;
+    };
+    return (
+      <PhaseIndicator
+        key={(part.id as string) ?? `${message.id}-phase-${index}`}
+        data={data}
+      />
+    );
+  }
+
   if (type === "text" && typeof part.text === "string") {
     const isLastPart = index === message.parts.length - 1;
     const showCursor = showStreamingCursor && isLastPart;
@@ -220,364 +235,141 @@ function renderAssistantPart(
     );
   }
 
-  if (type === "tool-googleSearch" || type === "tool-urlContext") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-search-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-  }
-
-  if (type === "tool-showCards") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-cards-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-cards-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        cards: Array<{
-          id: string;
-          title: string;
-          description: string;
-          badges?: string[];
-          links?: Array<{ label: string; url: string }>;
-        }>;
-      };
-      return (
-        <CardGrid
-          key={`${message.id}-cards-${index}`}
-          title={output.title ?? undefined}
-          cards={output.cards ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showChart") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-chart-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-chart-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        items: Array<{ name: string; value: number; subtitle?: string }>;
-      };
-      return (
-        <BarChart
-          key={`${message.id}-chart-${index}`}
-          title={output.title ?? undefined}
-          items={output.items ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showTimeline") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-timeline-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-timeline-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        items: Array<{ title: string; subtitle: string; points?: string[] }>;
-      };
-      return (
-        <Timeline
-          key={`${message.id}-timeline-${index}`}
-          title={output.title ?? undefined}
-          items={output.items ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showProfile") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-profile-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-profile-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        name: string;
-        role?: string | null;
-        summary?: string | null;
-        links?: Array<{ label: string; url: string }>;
-      };
-      return (
-        <ProfileCard
-          key={`${message.id}-profile-${index}`}
-          name={output.name ?? ""}
-          role={output.role ?? undefined}
-          summary={output.summary ?? undefined}
-          links={output.links ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showTable") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-table-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-table-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        columns: string[];
-        rows: (string | number)[][];
-      };
-      return (
-        <DataTable
-          key={`${message.id}-table-${index}`}
-          title={output.title ?? undefined}
-          columns={output.columns ?? []}
-          rows={output.rows ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showStats") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-stats-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-stats-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        items: Array<{ label: string; value: string | number }>;
-      };
-      return (
-        <StatsGrid
-          key={`${message.id}-stats-${index}`}
-          title={output.title ?? undefined}
-          items={output.items ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showList") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-list-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-list-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        items: string[];
-        style: "bulleted" | "numbered" | "checklist";
-      };
-      return (
-        <StyledList
-          key={`${message.id}-list-${index}`}
-          title={output.title ?? undefined}
-          items={output.items ?? []}
-          style={output.style ?? "bulleted"}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showComparison") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-comparison-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-comparison-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        items: Array<{ name: string; pros: string[]; cons?: string[] }>;
-      };
-      return (
-        <ComparisonCard
-          key={`${message.id}-comparison-${index}`}
-          title={output.title ?? undefined}
-          items={output.items ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showSteps") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-steps-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-steps-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        title?: string | null;
-        steps: Array<{ step: number; title: string; description: string }>;
-      };
-      return (
-        <StepsGuide
-          key={`${message.id}-steps-${index}`}
-          title={output.title ?? undefined}
-          steps={output.steps ?? []}
-        />
-      );
-    }
-  }
-
-  if (type === "tool-showQuote") {
-    if (
-      part.state === "input-streaming" ||
-      part.state === "input-available"
-    ) {
-      return (
-        <div key={`${message.id}-quote-loading-${index}`}>
-          <ToolLoading label={getToolLoadingLabel(type)} />
-        </div>
-      );
-    }
-    if (part.state === "output-error") {
-      return (
-        <div key={`${message.id}-quote-error-${index}`}>
-          <ToolError errorText={String(part.errorText ?? "")} />
-        </div>
-      );
-    }
-    if (part.state === "output-available" && part.output) {
-      const output = part.output as {
-        text: string;
-        source?: string | null;
-        variant?: "default" | "info" | "success" | "warning";
-      };
-      return (
-        <QuoteCard
-          key={`${message.id}-quote-${index}`}
-          text={output.text ?? ""}
-          source={output.source ?? undefined}
-          variant={output.variant ?? "default"}
-        />
-      );
-    }
+  // ツールパート: AI SDK の tool-<name> + state パターンで統一レンダリング
+  if (typeof type === "string" && type.startsWith("tool-")) {
+    return renderToolPart(part, type, `${message.id}-${type}-${index}`);
   }
 
   return null;
 }
+
+/** ツールパート共通: loading / error / output を state に応じて描画 */
+function renderToolPart(
+  part: Record<string, unknown>,
+  toolType: string,
+  key: string,
+): React.ReactNode {
+  const label = getToolLoadingLabel(toolType);
+
+  if (part.state === "input-streaming" || part.state === "input-available") {
+    return (
+      <div key={key}>
+        <ToolLoading label={label} />
+      </div>
+    );
+  }
+  if (part.state === "output-error") {
+    return (
+      <div key={key}>
+        <ToolError errorText={String(part.errorText ?? "")} />
+      </div>
+    );
+  }
+  if (part.state === "output-available" && part.output) {
+    const renderer = TOOL_OUTPUT_RENDERERS[toolType];
+    if (renderer) {
+      return (
+        <div key={key} className={renderer.wrapperClass ?? "w-full min-w-0"}>
+          {renderer.render(part.output as Record<string, unknown>)}
+        </div>
+      );
+    }
+  }
+  return null;
+}
+
+/** ツール名 → 出力描画関数のマップ（AI SDK の tool-<name> 形式に合わせる） */
+const TOOL_OUTPUT_RENDERERS: Record<
+  string,
+  {
+    render: (output: Record<string, unknown>) => React.ReactNode;
+    wrapperClass?: string;
+  }
+> = {
+  "tool-showCards": {
+    render: (o) => (
+      <CardGrid
+        title={(o.title as string | null) ?? undefined}
+        cards={(o.cards as { id: string; title: string; description: string; badges?: string[]; links?: { label: string; url: string }[] }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showChart": {
+    render: (o) => (
+      <BarChart
+        title={(o.title as string | null) ?? undefined}
+        items={(o.items as { name: string; value: number; subtitle?: string }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showTimeline": {
+    render: (o) => (
+      <Timeline
+        title={(o.title as string | null) ?? undefined}
+        items={(o.items as { title: string; subtitle: string; points?: string[] }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showProfile": {
+    render: (o) => (
+      <ProfileCard
+        name={(o.name as string) ?? ""}
+        role={(o.role as string | null) ?? undefined}
+        summary={(o.summary as string | null) ?? undefined}
+        links={(o.links as { label: string; url: string }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showTable": {
+    wrapperClass: "w-full min-w-0 overflow-x-auto",
+    render: (o) => (
+      <DataTable
+        title={(o.title as string | null) ?? undefined}
+        columns={(o.columns as string[]) ?? []}
+        rows={(o.rows as (string | number)[][]) ?? []}
+      />
+    ),
+  },
+  "tool-showStats": {
+    render: (o) => (
+      <StatsGrid
+        title={(o.title as string | null) ?? undefined}
+        items={(o.items as { label: string; value: string | number }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showList": {
+    render: (o) => (
+      <StyledList
+        title={(o.title as string | null) ?? undefined}
+        items={(o.items as string[]) ?? []}
+        style={(o.style as "bulleted" | "numbered" | "checklist") ?? "bulleted"}
+      />
+    ),
+  },
+  "tool-showComparison": {
+    render: (o) => (
+      <ComparisonCard
+        title={(o.title as string | null) ?? undefined}
+        items={(o.items as { name: string; pros: string[]; cons?: string[] }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showSteps": {
+    render: (o) => (
+      <StepsGuide
+        title={(o.title as string | null) ?? undefined}
+        steps={(o.steps as { step: number; title: string; description: string }[]) ?? []}
+      />
+    ),
+  },
+  "tool-showQuote": {
+    render: (o) => (
+      <QuoteCard
+        text={(o.text as string) ?? ""}
+        source={(o.source as string | null) ?? undefined}
+        variant={(o.variant as "default" | "info" | "success" | "warning") ?? "default"}
+      />
+    ),
+  },
+};
