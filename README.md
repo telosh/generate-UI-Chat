@@ -28,9 +28,11 @@ cp .env.example .env.local
 ```
 
 必須:
+
 - `GOOGLE_GENERATIVE_AI_API_KEY`
 
 任意（設定時のみレート制限有効）:
+
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
@@ -84,3 +86,19 @@ vercel --prod
 ## Dependency Safety Policy
 
 このプロジェクトは `pnpm` の `minimum-release-age` を有効化して、公開直後のパッケージを避ける設定にしています。
+
+## Commit Quality Gate (Husky)
+
+`husky` + `lint-staged` + `commitlint` + `commitizen(cz-git)` を導入しています。
+
+- `pre-commit`: 変更ファイルの ESLint 自動修正 + TypeScript 型チェック
+- `commit-msg`: Conventional Commits 形式の検証
+- `pre-push`: `pnpm check` (`lint:strict` + `typecheck` + `build`)
+
+### 推奨コミット手順
+
+```bash
+pnpm commit
+```
+
+対話形式でコミットメッセージを統一できます。
