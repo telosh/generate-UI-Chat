@@ -41,6 +41,7 @@ export function ChatLayout() {
     });
 
   const [toolMode, setToolMode] = useState<"single" | "multiple">("single");
+  const [searchMode, setSearchMode] = useState(false);
   const [model, setModel] = useState<GeminiModelId>(DEFAULT_GEMINI_MODEL);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +53,7 @@ export function ChatLayout() {
   const handlePromptSelect = (prompt: string) => {
     sendMessage(
       { parts: [{ type: "text", text: prompt }] },
-      { body: { toolMode, model } }
+      { body: { toolMode, model, searchMode } }
     );
   };
 
@@ -108,15 +109,27 @@ export function ChatLayout() {
               {messages.length === 0 ? (
                 <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
                   <p className="max-w-md text-muted-foreground text-pretty">
-                    {copy.chat.emptyState}
+                    {searchMode
+                      ? copy.chat.emptyStateSearch
+                      : copy.chat.emptyState}
                   </p>
                   <div className="w-full max-w-xl space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      {copy.chat.startPrompt}
+                      {searchMode
+                        ? copy.chat.startPromptSearch
+                        : copy.chat.startPrompt}
                     </p>
                     <SuggestedPrompts
                       onSelect={handlePromptSelect}
                       className="justify-center"
+                      disabled={
+                        status === "streaming" ||
+                        status === "submitted" ||
+                        (error !== undefined &&
+                          remainingSeconds !== null &&
+                          remainingSeconds > 0)
+                      }
+                      searchMode={searchMode}
                     />
                   </div>
                 </div>
@@ -196,37 +209,72 @@ export function ChatLayout() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">
-                {copy.toolMode.label}:{" "}
+                {copy.searchMode.label}:{" "}
               </span>
               <div
                 className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5"
                 role="group"
-                aria-label={copy.toolMode.label}
+                aria-label={copy.searchMode.label}
               >
-              <Button
-                type="button"
-                variant={toolMode === "single" ? "secondary" : "ghost"}
-                size="xs"
-                onClick={() => setToolMode("single")}
-                className="rounded-md"
-                aria-pressed={toolMode === "single"}
-                aria-label={copy.toolMode.singleDesc}
-              >
-                {copy.toolMode.single}
-              </Button>
-              <Button
-                type="button"
-                variant={toolMode === "multiple" ? "secondary" : "ghost"}
-                size="xs"
-                onClick={() => setToolMode("multiple")}
-                className="rounded-md"
-                aria-pressed={toolMode === "multiple"}
-                aria-label={copy.toolMode.multipleDesc}
-              >
-                {copy.toolMode.multiple}
-              </Button>
+                <Button
+                  type="button"
+                  variant={!searchMode ? "secondary" : "ghost"}
+                  size="xs"
+                  onClick={() => setSearchMode(false)}
+                  className="rounded-md"
+                  aria-pressed={!searchMode}
+                  aria-label={copy.searchMode.uiDesc}
+                >
+                  {copy.searchMode.ui}
+                </Button>
+                <Button
+                  type="button"
+                  variant={searchMode ? "secondary" : "ghost"}
+                  size="xs"
+                  onClick={() => setSearchMode(true)}
+                  className="rounded-md"
+                  aria-pressed={searchMode}
+                  aria-label={copy.searchMode.searchDesc}
+                >
+                  {copy.searchMode.search}
+                </Button>
+              </div>
             </div>
-            </div>
+            {!searchMode ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {copy.toolMode.label}:{" "}
+                </span>
+                <div
+                  className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5"
+                  role="group"
+                  aria-label={copy.toolMode.label}
+                >
+                  <Button
+                    type="button"
+                    variant={toolMode === "single" ? "secondary" : "ghost"}
+                    size="xs"
+                    onClick={() => setToolMode("single")}
+                    className="rounded-md"
+                    aria-pressed={toolMode === "single"}
+                    aria-label={copy.toolMode.singleDesc}
+                  >
+                    {copy.toolMode.single}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={toolMode === "multiple" ? "secondary" : "ghost"}
+                    size="xs"
+                    onClick={() => setToolMode("multiple")}
+                    className="rounded-md"
+                    aria-pressed={toolMode === "multiple"}
+                    aria-label={copy.toolMode.multipleDesc}
+                  >
+                    {copy.toolMode.multiple}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </div>
           {error ? (
             <div
@@ -271,10 +319,11 @@ export function ChatLayout() {
                 remainingSeconds > 0)
             }
             retrySeconds={remainingSeconds}
+            searchMode={searchMode}
             onSubmit={(value) =>
               sendMessage(
                 { parts: [{ type: "text", text: value }] },
-                { body: { toolMode, model } }
+                { body: { toolMode, model, searchMode } }
               )
             }
           />

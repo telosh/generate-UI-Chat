@@ -11,12 +11,15 @@ type ChatInputProps = {
   onSubmit: (value: string) => void;
   /** クォータエラー時のカウントダウン秒数。0より大きいときボタンに表示 */
   retrySeconds?: number | null;
+  /** 検索モード時は異なるプレースホルダーを表示 */
+  searchMode?: boolean;
 };
 
 export function ChatInput({
   disabled,
   onSubmit,
   retrySeconds = null,
+  searchMode = false,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
 
@@ -50,7 +53,9 @@ export function ChatInput({
         value={input}
         disabled={disabled}
         onChange={(event) => setInput(event.target.value)}
-        placeholder={copy.chat.placeholder}
+        placeholder={
+          searchMode ? copy.chat.placeholderSearch : copy.chat.placeholder
+        }
         autoComplete="off"
         spellCheck={false}
         className="min-h-[48px] sm:min-h-[44px] h-auto border-0 bg-transparent px-4 py-0 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
