@@ -115,6 +115,41 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* View Transitions: ページ切り替え時のアニメーション */
+@view-transition {
+  navigation: auto;
+}
+
+@keyframes view-transition-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes view-transition-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+::view-transition-old(root) {
+  animation: 0.25s ease-out both view-transition-fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 0.25s ease-out both view-transition-fade-in;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -127,9 +162,49 @@
     color-scheme: light dark;
   }
 
+  /* スクロールバー非表示（サイト全体） */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* テーマ切り替え時のスムーズなトランジション */
+  html {
+    transition:
+      background-color 0.2s ease-out,
+      color 0.2s ease-out;
+  }
+  body {
+    transition:
+      background-color 0.2s ease-out,
+      color 0.2s ease-out;
+  }
+  /* カード・サイドバー等のテーマ色も遷移 */
+  [class*="bg-background"],
+  [class*="bg-card"],
+  [class*="bg-muted"],
+  [class*="bg-secondary"],
+  [class*="bg-accent"],
+  [class*="bg-popover"] {
+    transition:
+      background-color 0.2s ease-out,
+      color 0.2s ease-out,
+      border-color 0.2s ease-out,
+      box-shadow 0.2s ease-out;
+  }
+
   a,
   button {
     touch-action: manipulation;
+  }
+
+  /* Tap highlight follows design (Vercel guideline) */
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
   }
 
   :focus-visible {
@@ -146,5 +221,23 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+    /* View Transitions: モーション削減時は即時切り替え */
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* スクロールバー非表示（オーバーフロー要素用） */
+@layer utilities {
+  .scrollbar-thin,
+  .scrollbar-chat {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-thin::-webkit-scrollbar,
+  .scrollbar-chat::-webkit-scrollbar {
+    display: none;
   }
 }

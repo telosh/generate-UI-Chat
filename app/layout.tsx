@@ -15,15 +15,22 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://generative-resume.vercel.app"),
-  title: "Interactive Generative Resume",
+  title: "genUIAI - 自動生成UI検証サイト",
   description:
-    "AI-native frontend portfolio using Next.js, Vercel, and generative interfaces.",
+    "AI SDK による Generative UI の検証・デモサイト。チャットで動的にカード・チャート・タイムラインなどをストリーミング表示します。",
   openGraph: {
-    title: "Interactive Generative Resume",
+    title: "genUIAI - 自動生成UI検証サイト",
     description:
-      "Explore projects, skills, and experience through streaming generative UI.",
+      "AI SDK による Generative UI の検証・デモ。ストリーミングで動的UIを生成します。",
     images: ["/og?city=World"],
   },
+};
+
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#252525" },
+  ],
 };
 
 export default function RootLayout({
@@ -32,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ja" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

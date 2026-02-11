@@ -2,6 +2,7 @@
 
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { copy } from "@/app/lib/ui/copy";
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -15,7 +16,7 @@ export function ThemeToggle() {
       aria-label={`Switch to ${nextTheme} mode`}
       className="touch-manipulation"
     >
-      {resolvedTheme === "dark" ? "Light" : "Dark"} Mode
+      {resolvedTheme === "dark" ? copy.themeToggle.light : copy.themeToggle.dark}
     </Button>
   );
 }
