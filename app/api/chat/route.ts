@@ -1,4 +1,5 @@
 import { google } from "@ai-sdk/google";
+import { googleTools } from "@ai-sdk/google/internal";
 import {
   convertToModelMessages,
   stepCountIs,
@@ -26,10 +27,11 @@ function getClientIp(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { messages, toolMode, model: modelParam } = (await request.json()) as {
+    const { messages, toolMode, model: modelParam, searchMode } = (await request.json()) as {
       messages: UIMessage[];
       toolMode?: "single" | "multiple";
       model?: string;
+      searchMode?: boolean;
     };
 
     const model =
@@ -74,13 +76,20 @@ export async function POST(request: Request) {
 
     const modelMessages = await convertToModelMessages(messages);
 
-    const maxSteps = toolMode === "multiple" ? 5 : 1;
+    const useSearch = searchMode === true;
+    const tools = useSearch
+      ? {
+          googleSearch: googleTools.googleSearch({}),
+          urlContext: googleTools.urlContext({}),
+        }
+      : chatTools;
+    const maxSteps = useSearch ? 1 : toolMode === "multiple" ? 5 : 1;
 
     const result = streamText({
       model: google(model),
-      system: buildSystemPrompt(),
+      system: buildSystemPrompt(useSearch),
       messages: modelMessages,
-      tools: chatTools,
+      tools,
       stopWhen: stepCountIs(maxSteps),
       providerOptions: {
         google: {
