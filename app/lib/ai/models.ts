@@ -5,34 +5,46 @@
 
 export const GEMINI_MODELS = [
   {
-    id: "gemini-2.5-flash-lite",
-    label: "Flash-Lite",
-    description: "最速・コスト効率",
-    disabled: false,
-  },
-  {
-    id: "gemini-2.5-flash",
-    label: "Flash",
-    description: "バランス・Search対応",
-    disabled: false,
-  },
-  {
-    id: "gemini-2.5-pro",
-    label: "Pro",
-    description: "高精度・推論・Search対応",
+    id: "gemini-3-pro-preview",
+    label: "3 Pro",
+    description: "最先端・多モーダル",
     disabled: false,
   },
   {
     id: "gemini-3-flash-preview",
     label: "3 Flash",
-    description: "先進バランス",
-    disabled: true,
+    description: "先進バランス・高速",
+    disabled: false,
   },
   {
-    id: "gemini-3-pro-preview",
-    label: "3 Pro",
-    description: "最先端",
-    disabled: true,
+    id: "gemini-2.5-pro",
+    label: "2.5 Pro",
+    description: "高精度・推論・Search対応",
+    disabled: false,
+  },
+  {
+    id: "gemini-2.5-flash",
+    label: "2.5 Flash",
+    description: "バランス・Search対応",
+    disabled: false,
+  },
+  {
+    id: "gemini-2.5-flash-lite",
+    label: "2.5 Flash-Lite",
+    description: "最速・コスト効率",
+    disabled: false,
+  },
+  {
+    id: "gemini-2.0-flash",
+    label: "2.0 Flash",
+    description: "2026/3まで利用可",
+    disabled: false,
+  },
+  {
+    id: "gemini-2.0-flash-lite",
+    label: "2.0 Flash-Lite",
+    description: "2026/3まで利用可",
+    disabled: false,
   },
 ] as const;
 

@@ -28,7 +28,7 @@ export function CardGrid({ title, cards }: CardGridProps) {
       {title && (
         <h3 className="text-lg font-semibold">{title}</h3>
       )}
-      <div className="grid gap-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
           <motion.article
             key={card.id}
@@ -38,8 +38,10 @@ export function CardGrid({ title, cards }: CardGridProps) {
           >
             <Card className="overflow-hidden">
               <CardHeader className="space-y-2">
-                <CardTitle className="text-lg">{card.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">{card.description}</p>
+                <CardTitle className="text-lg">{card.title || "無題"}</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {card.description || "—"}
+                </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 {card.badges && card.badges.length > 0 && (

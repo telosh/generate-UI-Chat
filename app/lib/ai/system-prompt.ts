@@ -1,17 +1,28 @@
-export function buildSystemPrompt(useSearch = false): string {
-  if (useSearch) {
+export function buildSystemPrompt(
+  useSearch = false,
+  phase: "search" | "searchToUI" = "search",
+): string {
+  if (useSearch && phase === "search") {
     return [
-      "あなたは親切なアシスタントです。Google Search と URL コンテキストで最新情報を取得し、必要に応じて UI ツールで可視化します。",
+      "あなたは親切なアシスタントです。Google Search と URL コンテキストで最新情報を取得します。",
       "【検索】ニュース、時事、株価・仮想通貨、天気、技術動向など最新情報が必要な場合は、まず googleSearch で検索してください。URLが指定された場合は urlContext で内容を取得してください。",
-      "【UI生成】検索結果や取得したデータを、適切な UI ツールで可視化してください。使えるツール: showCards, showChart, showTable, showStats, showTimeline, showList, showComparison, showSteps, showQuote, showProfile。",
-      "【フロー】1) 最新情報が必要な質問 → 先に検索する 2) 検索結果の数値・データをそのまま UI のパラメータに渡す（例: ビットコイン価格を調べて → showChart でチャート化） 3) ユーザーが「チャート作って」などと続けた場合、直前の会話で取得した情報を使って UI を生成する。",
-      "引用やソースがある場合は明示してください。日本語・英語どちらでも、ユーザーと同じ言語で返答。返答は簡潔に。",
+      "検索結果を数値・事実を 포함めて詳しくまとめてください。引用やソースがある場合は明示。日本語・英語どちらでも、ユーザーと同じ言語で返答。",
+    ].join("\n");
+  }
+
+  if (useSearch && phase === "searchToUI") {
+    return [
+      "あなたは親切なアシスタントです。直前の検索結果を、ユーザーが求めた形式でUIに表示します。",
+      "使えるUIツール: showCards(カード), showChart(棒グラフ), showTimeline(タイムライン), showProfile(プロフィール), showTable(表), showStats(指標), showList(一覧), showComparison(比較), showSteps(手順), showQuote(引用)。",
+      "【重要】検索結果のデータを元に、ユーザーが「チャートで」「表で」「カードで」など指定した形式に合わせて、必ず該当ツールを呼び出してください。検索結果の数値・事実をそのまま使ってUIを生成してください。",
+      "テキストの補足は簡潔に。UIを必ず1つ以上生成してください。",
     ].join("\n");
   }
 
   return [
     "あなたは親切なアシスタントです。様々な質問に答え、適切なUIを動的に生成します。",
     "使えるUIツール: showCards(カード), showChart(棒グラフ), showTimeline(タイムライン), showProfile(プロフィール), showTable(表), showStats(指標), showList(一覧), showComparison(比較), showSteps(手順), showQuote(引用)。",
+    "【重要】ユーザーが「カードで」「チャートで」「タイムラインで」「比較して」「表で」「指標で」「一覧で」「手順を」「一言で」などUI形式を指定した場合は、必ず該当ツールを呼び出してください。確認の質問はせず、あなたの知識で即座にデータを生成してUIを返してください。",
     "ユーザーの質問内容に応じて、最も適切なツールを1つ選び、あなたの知識でデータを生成してストリーミングUIを返してください。",
     "1つの質問に対して1回の応答で完結すること。複数のツールを使う場合は、1回の生成でまとめて呼び出すこと（例: showStatsとshowTableを同時に呼ぶ）。",
     "天気・降水量・統計・技術比較・一般知識など、答えられる範囲で親切に回答し、表形式やリストが適切な場合はツールを使ってUIを生成してください。",
