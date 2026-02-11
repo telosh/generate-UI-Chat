@@ -1,8 +1,12 @@
 import { google } from "@ai-sdk/google";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  stepCountIs,
+  streamText,
+  type UIMessage,
+} from "ai";
 import { buildSystemPrompt } from "@/app/lib/ai/system-prompt";
 import { chatTools } from "@/app/lib/ai/tools";
-import { resumeData } from "@/app/lib/data/resume-data";
 import { getRateLimitClient } from "@/app/lib/ratelimit";
 
 export const runtime = "edge";
@@ -18,8 +22,9 @@ function getClientIp(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { messages } = (await request.json()) as {
+    const { messages, toolMode } = (await request.json()) as {
       messages: UIMessage[];
+      toolMode?: "single" | "multiple";
     };
 
     const ratelimit = getRateLimitClient();
@@ -27,6 +32,7 @@ export async function POST(request: Request) {
       const ip = getClientIp(request);
       const { success, reset } = await ratelimit.limit(ip);
       if (!success) {
+        const retryAfter = reset ? Math.ceil((reset - Date.now()) / 1000) : 60;
         return new Response(
           JSON.stringify({
             error: "Rate limit exceeded. Please try again later.",
@@ -34,7 +40,10 @@ export async function POST(request: Request) {
           }),
           {
             status: 429,
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": String(Math.max(1, retryAfter)),
+            },
           },
         );
       }
@@ -55,11 +64,24 @@ export async function POST(request: Request) {
 
     const modelMessages = await convertToModelMessages(messages);
 
+    const maxSteps = toolMode === "multiple" ? 5 : 1;
+
     const result = streamText({
       model: google("gemini-2.5-flash"),
-      system: buildSystemPrompt(resumeData),
+      system: buildSystemPrompt(),
       messages: modelMessages,
       tools: chatTools,
+      stopWhen: stepCountIs(maxSteps),
+      providerOptions: {
+        google: {
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+          ],
+        },
+      },
     });
 
     return result.toUIMessageStreamResponse({
