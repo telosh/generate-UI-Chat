@@ -1,0 +1,210 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { useChat } from "@ai-sdk/react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChatInput } from "@/app/components/chat/chat-input";
+import { ChatMessage } from "@/app/components/chat/chat-message";
+import { SuggestedPrompts } from "@/app/components/chat/suggested-prompts";
+import { AppHeader } from "@/app/components/layout/app-header";
+import { useQuotaRetryCountdown } from "@/app/hooks/use-quota-retry-countdown";
+import { copy } from "@/app/lib/ui/copy";
+import { formatChatError } from "@/app/lib/chat/format-error";
+
+export function ChatLayout() {
+  const reducedMotion = useReducedMotion();
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+      }),
+    [],
+  );
+
+  const { messages, sendMessage, setMessages, status, error, clearError } =
+    useChat<UIMessage>({
+      transport,
+    });
+
+  const [toolMode, setToolMode] = useState<"single" | "multiple">("single");
+
+  const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
+    error,
+    clearError,
+  });
+
+  const handlePromptSelect = (prompt: string) => {
+    sendMessage(
+      { parts: [{ type: "text", text: prompt }] },
+      { body: { toolMode } }
+    );
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+  };
+
+  return (
+    <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
+      <AppHeader onNewChat={handleNewChat} showNewChat />
+
+      {/* チャット表示領域: 画面全体を占有、スクロール可能（入力エリアの下まで描画） */}
+      <main id="main-content" className="flex flex-1 min-h-0 flex-col overflow-hidden">
+        <div className="scrollbar-chat flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="mx-auto w-full max-w-3xl px-4 py-6 pb-32 sm:px-6 sm:py-8 sm:pb-36">
+            {/* チャットヘッダー: メッセージあり時のみ表示 */}
+            {messages.length > 0 ? (
+              <div className="flex shrink-0 items-center justify-between gap-2 pb-4">
+                <h1 className="text-lg font-semibold tracking-tight truncate">
+                  {copy.chat.title}
+                </h1>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNewChat}
+                  className="shrink-0 gap-1.5 touch-manipulation min-h-[44px] sm:min-h-0"
+                  aria-label={copy.chat.newChat}
+                >
+                  <Plus className="size-4" aria-hidden />
+                  <span className="hidden sm:inline">{copy.chat.newChat}</span>
+                </Button>
+              </div>
+            ) : null}
+
+            <div className="space-y-4">
+              {messages.length === 0 ? (
+                <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
+                  <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-balance">
+                    {copy.chat.title}
+                  </h1>
+                  <p className="max-w-md text-muted-foreground text-pretty">
+                    {copy.chat.emptyState}
+                  </p>
+                  <div className="w-full max-w-xl space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {copy.chat.startPrompt}
+                    </p>
+                    <SuggestedPrompts
+                      onSelect={handlePromptSelect}
+                      className="justify-center"
+                    />
+                  </div>
+                </div>
+              ) : (
+                messages.map((message, index) => (
+                  <motion.div
+                    key={message.id}
+                    initial={
+                      reducedMotion ? false : { opacity: 0, y: 6 }
+                    }
+                    animate={
+                      reducedMotion ? {} : { opacity: 1, y: 0 }
+                    }
+                    transition={{
+                      duration: 0.2,
+                      delay: index * 0.03,
+                    }}
+                  >
+                    <ChatMessage message={message as never} />
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* 入力フォーム: ボトムにオーバーレイ、透過でチャットが透ける */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 pb-4 pt-4">
+        <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {copy.toolMode.label}:{" "}
+            </span>
+            <div
+              className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5"
+              role="group"
+              aria-label={copy.toolMode.label}
+            >
+              <Button
+                type="button"
+                variant={toolMode === "single" ? "secondary" : "ghost"}
+                size="xs"
+                onClick={() => setToolMode("single")}
+                className="rounded-md"
+                aria-pressed={toolMode === "single"}
+                aria-label={copy.toolMode.singleDesc}
+              >
+                {copy.toolMode.single}
+              </Button>
+              <Button
+                type="button"
+                variant={toolMode === "multiple" ? "secondary" : "ghost"}
+                size="xs"
+                onClick={() => setToolMode("multiple")}
+                className="rounded-md"
+                aria-pressed={toolMode === "multiple"}
+                aria-label={copy.toolMode.multipleDesc}
+              >
+                {copy.toolMode.multiple}
+              </Button>
+            </div>
+          </div>
+          {error ? (
+            <div
+              className="mb-3 space-y-2"
+              role="alert"
+              aria-live="polite"
+            >
+              <p className="text-sm text-destructive">
+                {remainingSeconds !== null && remainingSeconds > 0
+                  ? copy.chat.quotaErrorRetryIn(remainingSeconds)
+                  : formatChatError(error)}
+              </p>
+              {remainingSeconds !== null &&
+                totalSeconds !== null &&
+                totalSeconds > 0 && (
+                  <div
+                    className="h-1.5 overflow-hidden rounded-full bg-muted"
+                    aria-hidden
+                  >
+                    <motion.div
+                      className="h-full rounded-full bg-primary/60"
+                      initial={{ width: "100%" }}
+                      animate={{
+                        width: `${(remainingSeconds / totalSeconds) * 100}%`,
+                      }}
+                      transition={
+                        reducedMotion
+                          ? { duration: 0 }
+                          : { duration: 1, ease: "linear" }
+                      }
+                    />
+                  </div>
+                )}
+            </div>
+          ) : null}
+          <ChatInput
+            disabled={
+              status === "streaming" ||
+              status === "submitted" ||
+              (error !== undefined &&
+                remainingSeconds !== null &&
+                remainingSeconds > 0)
+            }
+            retrySeconds={remainingSeconds}
+            onSubmit={(value) =>
+              sendMessage(
+                { parts: [{ type: "text", text: value }] },
+                { body: { toolMode } }
+              )
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
