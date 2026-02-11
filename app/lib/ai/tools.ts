@@ -34,7 +34,7 @@ export const chatTools = {
     description: "Show a skills chart when user asks about tech stack or strengths.",
     inputSchema: z.object({
       category: z
-        .enum(["frontend", "backend", "design"])
+        .enum(["frontend", "backend", "cloud"])
         .default("frontend")
         .describe("The skills domain to visualize."),
     }),
