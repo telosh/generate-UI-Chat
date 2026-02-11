@@ -90,6 +90,11 @@ export const copy = {
   streaming: {
     thinking: "考え中…",
   },
+  phase: {
+    searching: "検索中…",
+    generatingUi: "UI生成中…",
+    default: "処理中…",
+  },
   toolLoading: {
     googleSearch: "検索中…",
     urlContext: "URL取得中…",
