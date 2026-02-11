@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/app/lib/data/resume-data";
+import { copy } from "@/app/lib/ui/copy";
 
 export function ProjectCard({ projects }: { projects: Project[] }) {
   const reducedMotion = useReducedMotion();
@@ -13,7 +14,7 @@ export function ProjectCard({ projects }: { projects: Project[] }) {
     return (
       <Card>
         <CardContent className="p-4 text-sm text-muted-foreground">
-          No project matched this filter. Try another keyword.
+          {copy.projectCard.noMatch}
         </CardContent>
       </Card>
     );
@@ -45,14 +46,16 @@ export function ProjectCard({ projects }: { projects: Project[] }) {
               <div className="flex flex-wrap gap-2">
                 <Button asChild size="sm" variant="outline">
                   <a href={project.githubUrl} target="_blank" rel="noreferrer">
-                    GitHub
+                    {copy.projectCard.github}
                   </a>
                 </Button>
-                <Button asChild size="sm">
-                  <a href={project.liveUrl} target="_blank" rel="noreferrer">
-                    Live Demo
-                  </a>
-                </Button>
+                {project.liveUrl ? (
+                  <Button asChild size="sm">
+                    <a href={project.liveUrl} target="_blank" rel="noreferrer">
+                      {copy.projectCard.liveDemo}
+                    </a>
+                  </Button>
+                ) : null}
               </div>
             </CardContent>
           </Card>

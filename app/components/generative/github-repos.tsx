@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Project } from "@/app/lib/data/resume-data";
+import { copy } from "@/app/lib/ui/copy";
 
 export function GithubRepos({ projects }: { projects: Project[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Highlighted Repositories</CardTitle>
+        <CardTitle>{copy.githubRepos.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {projects.map((project) => (
@@ -17,7 +18,7 @@ export function GithubRepos({ projects }: { projects: Project[] }) {
             </div>
             <Button asChild size="sm" variant="outline">
               <a href={project.githubUrl} target="_blank" rel="noreferrer">
-                Open
+                {copy.githubRepos.open}
               </a>
             </Button>
           </div>

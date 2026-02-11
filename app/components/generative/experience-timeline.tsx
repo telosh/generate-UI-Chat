@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Experience } from "@/app/lib/data/resume-data";
+import { copy } from "@/app/lib/ui/copy";
 
 export function ExperienceTimeline({ items }: { items: Experience[] }) {
   const reducedMotion = useReducedMotion();
@@ -10,7 +11,7 @@ export function ExperienceTimeline({ items }: { items: Experience[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Experience Timeline</CardTitle>
+        <CardTitle>{copy.experience.title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {items.map((item, index) => (
