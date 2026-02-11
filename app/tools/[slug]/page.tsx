@@ -253,10 +253,11 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const sample = samples[slug];
-  if (!sample) return { title: "サンプル | genUIAI" };
+  const toolItem = copy.tools.items.find((item) => item.slug === slug);
+  if (!sample || !toolItem) return { title: "サンプル | genUIAI" };
   return {
-    title: `${sample.title} サンプル | genUIAI`,
-    description: sample.description,
+    title: `${toolItem.name} サンプル | genUIAI`,
+    description: toolItem.description,
   };
 }
 
@@ -267,8 +268,9 @@ export default async function ToolSamplePage({
 }) {
   const { slug } = await params;
   const sample = samples[slug];
+  const toolItem = copy.tools.items.find((item) => item.slug === slug);
 
-  if (!sample) {
+  if (!sample || !toolItem) {
     notFound();
   }
 
@@ -277,9 +279,9 @@ export default async function ToolSamplePage({
       <div className="mx-auto max-w-3xl">
         <div className="mb-10">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl mb-2">
-            {sample.title}
+            {toolItem.name}
           </h1>
-          <p className="text-muted-foreground">{sample.description}</p>
+          <p className="text-muted-foreground">{toolItem.description}</p>
         </div>
 
         <div className="space-y-6">{sample.component}</div>

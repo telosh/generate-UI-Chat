@@ -57,8 +57,8 @@ export function AppHeader({
 
   return (
     <header
-      className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      aria-label="メインナビゲーション"
+      className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+      aria-label={copy.header.navLabel}
     >
       <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 lg:px-8">
         <div className="min-w-0" aria-hidden={!leftContent}>
@@ -69,7 +69,7 @@ export function AppHeader({
           className="flex justify-self-center items-center gap-2 font-semibold tracking-tight hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
         >
           <span className="hidden sm:inline">{copy.sidebar.title}</span>
-          <span className="sm:hidden">genUIAI</span>
+          <span className="sm:hidden">{copy.header.mobileTitle}</span>
         </Link>
 
         <div className="flex min-w-0 items-center justify-end gap-2">
@@ -79,10 +79,10 @@ export function AppHeader({
                 variant="outline"
                 size="sm"
                 className="gap-1.5 touch-manipulation min-h-[44px] sm:min-h-0"
-                aria-label="メニューを開く"
+                aria-label={copy.header.menuOpen}
               >
                 <ChevronDown className="size-4" aria-hidden />
-                <span className="hidden sm:inline">メニュー</span>
+                <span className="hidden sm:inline">{copy.header.menu}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -101,7 +101,7 @@ export function AppHeader({
               <DropdownMenuItem asChild>
                 <Link href="/tools" className="gap-2">
                   <LayoutGrid className="size-4" aria-hidden />
-                  一覧ページ
+                  {copy.header.toolsList}
                 </Link>
               </DropdownMenuItem>
               {copy.tools.items.map((item) => {
