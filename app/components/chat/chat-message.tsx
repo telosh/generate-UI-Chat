@@ -75,7 +75,7 @@ export function ChatMessage({ message }: { message: AnyMessage }) {
             }
             if (part.state === "output-available" && part.output) {
               const output = part.output as {
-                category: "frontend" | "backend" | "design";
+                category: "frontend" | "backend" | "cloud";
                 skills: Array<{ name: string; level: number; years: number }>;
               };
               return (
@@ -118,14 +118,17 @@ export function ChatMessage({ message }: { message: AnyMessage }) {
               const output = part.output as {
                 profile: {
                   name: string;
+                  alias: string;
                   role: string;
                   summary: string;
                   location: string;
+                  origin: string;
                   contact: {
                     email: string;
                     website: string;
                     github: string;
                     linkedin: string;
+                    x: string;
                   };
                 };
               };
