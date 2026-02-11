@@ -46,7 +46,8 @@ description: Develop accessible, performant UI components following Vercel Desig
 ```
 app/components/
 ├── chat/        # Chat UI, messages, input
-├── generative/  # Dynamic cards (skills, projects, contact)
-├── hero/        # Profile section
-└── theme-provider.tsx
+├── generative/  # Dynamic UI cards/charts/tables/lists
+├── layout/      # Header, chat layout, tools navigation
+├── theme-provider.tsx
+└── theme-toggle.tsx
 ```
