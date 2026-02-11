@@ -4,13 +4,24 @@ import { useMemo, useState } from "react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ChatInput } from "@/app/components/chat/chat-input";
 import { ChatMessage } from "@/app/components/chat/chat-message";
 import { SuggestedPrompts } from "@/app/components/chat/suggested-prompts";
 import { AppHeader } from "@/app/components/layout/app-header";
 import { useQuotaRetryCountdown } from "@/app/hooks/use-quota-retry-countdown";
+import {
+  DEFAULT_GEMINI_MODEL,
+  GEMINI_MODELS,
+  type GeminiModelId,
+} from "@/app/lib/ai/models";
 import { copy } from "@/app/lib/ui/copy";
 import { formatChatError } from "@/app/lib/chat/format-error";
 
@@ -30,6 +41,7 @@ export function ChatLayout() {
     });
 
   const [toolMode, setToolMode] = useState<"single" | "multiple">("single");
+  const [model, setModel] = useState<GeminiModelId>(DEFAULT_GEMINI_MODEL);
 
   const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
     error,
@@ -39,9 +51,12 @@ export function ChatLayout() {
   const handlePromptSelect = (prompt: string) => {
     sendMessage(
       { parts: [{ type: "text", text: prompt }] },
-      { body: { toolMode } }
+      { body: { toolMode, model } }
     );
   };
+
+  const currentModelLabel =
+    GEMINI_MODELS.find((m) => m.id === model)?.label ?? model;
 
   const handleNewChat = () => {
     setMessages([]);
@@ -120,15 +135,51 @@ export function ChatLayout() {
       {/* 入力フォーム: ボトムにオーバーレイ、透過でチャットが透ける */}
       <div className="absolute bottom-0 left-0 right-0 z-10 pb-4 pt-4">
         <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
-          <div className="mb-3 flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              {copy.toolMode.label}:{" "}
-            </span>
-            <div
-              className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5"
-              role="group"
-              aria-label={copy.toolMode.label}
-            >
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {copy.model.label}:{" "}
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    className="gap-1.5 min-w-28 justify-between"
+                    aria-label={copy.model.ariaLabel}
+                    aria-haspopup="listbox"
+                  >
+                    <span className="truncate">{currentModelLabel}</span>
+                    <ChevronDown className="size-3 shrink-0 opacity-60" aria-hidden />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-48">
+                  {GEMINI_MODELS.map((m) => (
+                    <DropdownMenuItem
+                      key={m.id}
+                      disabled={m.disabled}
+                      onClick={() => !m.disabled && setModel(m.id)}
+                      className="flex flex-col items-start gap-0.5 py-2"
+                    >
+                      <span className="font-medium">{m.label}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {m.disabled ? "調整中" : m.description}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {copy.toolMode.label}:{" "}
+              </span>
+              <div
+                className="inline-flex rounded-lg border border-border/60 bg-muted/30 p-0.5"
+                role="group"
+                aria-label={copy.toolMode.label}
+              >
               <Button
                 type="button"
                 variant={toolMode === "single" ? "secondary" : "ghost"}
@@ -151,6 +202,7 @@ export function ChatLayout() {
               >
                 {copy.toolMode.multiple}
               </Button>
+            </div>
             </div>
           </div>
           {error ? (
@@ -199,7 +251,7 @@ export function ChatLayout() {
             onSubmit={(value) =>
               sendMessage(
                 { parts: [{ type: "text", text: value }] },
-                { body: { toolMode } }
+                { body: { toolMode, model } }
               )
             }
           />
