@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Interactive Generative Resume
 
-## Getting Started
+Next.js + Vercel + AI SDK で構築した、生成UIベースのポートフォリオです。  
+採用担当者が自然言語で質問すると、テキストだけでなくプロジェクトカードやスキル可視化などのUIがストリーミング表示されます。
 
-First, run the development server:
+### 主な機能
+
+- Edge Middleware によるジオロケーション挨拶
+- AI SDK (`streamText` + tool calling) による Generative UI
+- ダークモード / ライトモード切り替え
+- 動的 OGP (`@vercel/og`)
+- Upstash レート制限（有効時）
+
+## セットアップ
+
+### 1) Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2) Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env.example` を `.env.local` にコピーして値を設定します。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cp .env.example .env.local
+```
 
-## Learn More
+必須:
+- `GOOGLE_GENERATIVE_AI_API_KEY`
 
-To learn more about Next.js, take a look at the following resources:
+任意（設定時のみレート制限有効）:
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3) Run locally
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+http://localhost:3000 を開いて動作確認してください。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Build / Lint
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm lint
+pnpm build
+```
+
+## Vercel デプロイ
+
+### CLI でデプロイ
+
+```bash
+npm i -g vercel
+vercel
+```
+
+本番反映:
+
+```bash
+vercel --prod
+```
+
+### Vercel ダッシュボードで設定する環境変数
+
+- `GOOGLE_GENERATIVE_AI_API_KEY` (Required)
+- `UPSTASH_REDIS_REST_URL` (Optional)
+- `UPSTASH_REDIS_REST_TOKEN` (Optional)
+
+## 技術構成
+
+- Next.js App Router
+- TypeScript
+- AI SDK (`ai`, `@ai-sdk/react`, `@ai-sdk/google`)
+- Tailwind CSS v4 + shadcn/ui
+- framer-motion
+- next-themes
+- @vercel/og
+- @upstash/ratelimit / @upstash/redis
+
+## Dependency Safety Policy
+
+このプロジェクトは `pnpm` の `minimum-release-age` を有効化して、公開直後のパッケージを避ける設定にしています。
