@@ -1,4 +1,4 @@
-export type SkillCategory = "frontend" | "backend" | "design";
+export type SkillCategory = "frontend" | "backend" | "cloud";
 
 export type SkillItem = {
   name: string;
@@ -18,6 +18,7 @@ export type Project = {
 
 export type Experience = {
   company: string;
+  companyUrl?: string;
   role: string;
   period: string;
   highlights: string[];
@@ -25,49 +26,62 @@ export type Experience = {
 
 export const resumeData = {
   profile: {
-    name: "Terum",
-    role: "Frontend Engineer",
+    name: "Terumi",
+    alias: "telosh",
+    role: "Web Application Engineer",
     summary:
-      "I build fast, accessible, and AI-native web experiences with modern React and Next.js.",
+      "フロントエンドをメイン領域としつつ、GCP Professional 3資格を保持するクラウドエンジニア。東京からフルリモートで活動中。最近はAI駆動開発に注力。",
     location: "Tokyo, Japan",
+    origin: "Miyazaki, Japan",
     contact: {
-      email: "hello@example.com",
-      website: "https://example.dev",
-      github: "https://github.com/example",
-      linkedin: "https://www.linkedin.com/in/example",
+      email: "terumi.contact.web@gmail.com",
+      website: "https://telosh.xyz",
+      github: "https://github.com/telosh",
+      linkedin: "https://www.linkedin.com/in/terumi-kawano-651790360/",
+      x: "https://x.com/TellM1_",
     },
   },
   skills: {
     frontend: [
-      { name: "React", level: 95, years: 6 },
-      { name: "Next.js", level: 92, years: 4 },
-      { name: "TypeScript", level: 90, years: 5 },
-      { name: "Tailwind CSS", level: 88, years: 3 },
-      { name: "Accessibility", level: 86, years: 4 },
+      { name: "React", level: 82, years: 3 },
+      { name: "Next.js", level: 80, years: 3 },
+      { name: "TypeScript", level: 82, years: 3 },
+      { name: "Tailwind CSS", level: 78, years: 3 },
+      { name: "Angular", level: 55, years: 1 },
+      { name: "Gatsby", level: 55, years: 1 },
+      { name: "SCSS", level: 60, years: 1 },
+      { name: "Bootstrap", level: 55, years: 1 },
     ] satisfies SkillItem[],
     backend: [
-      { name: "Node.js", level: 82, years: 4 },
-      { name: "PostgreSQL", level: 76, years: 3 },
-      { name: "Prisma", level: 75, years: 3 },
-      { name: "REST API", level: 85, years: 5 },
-      { name: "Edge Functions", level: 80, years: 2 },
+      { name: "Node.js", level: 72, years: 2 },
+      { name: "Express.js", level: 70, years: 2 },
+      { name: "PHP", level: 65, years: 2 },
+      { name: "Laravel", level: 65, years: 2 },
+      { name: "PostgreSQL", level: 65, years: 2 },
+      { name: "MySQL", level: 65, years: 2 },
+      { name: "Firebase", level: 70, years: 2 },
+      { name: "Hono", level: 50, years: 1 },
+      { name: "Redis", level: 45, years: 1 },
     ] satisfies SkillItem[],
-    design: [
-      { name: "Design Systems", level: 82, years: 3 },
-      { name: "Motion Design", level: 78, years: 3 },
-      { name: "Information Architecture", level: 80, years: 4 },
-      { name: "UX Writing", level: 72, years: 2 },
-      { name: "Figma", level: 84, years: 4 },
+    cloud: [
+      { name: "Google Cloud", level: 88, years: 2 },
+      { name: "Docker", level: 70, years: 2 },
+      { name: "Vercel", level: 75, years: 2 },
     ] satisfies SkillItem[],
   } satisfies Record<SkillCategory, SkillItem[]>,
+  certifications: [
+    "Google Cloud Professional Cloud Architect",
+    "Google Cloud Professional Cloud Security Engineer",
+    "Google Cloud Professional Cloud Developer",
+  ],
   projects: [
     {
       id: "gen-ui-resume",
-      title: "Interactive Generative Resume",
+      title: "AI Generative Resume",
       description:
-        "AI-native portfolio where natural language triggers rich UI cards, charts, and timelines.",
+        "AIチャットで経歴・スキルをインタラクティブに探索できるポートフォリオサイト。",
       impact:
-        "Reduced recruiter discovery time by making key achievements explorable in under 2 minutes.",
+        "自然言語でスキルやプロジェクトを質問するだけで、リッチなUIカードやチャートが動的に表示される体験を実現。",
       techStack: [
         "Next.js",
         "AI SDK",
@@ -75,51 +89,20 @@ export const resumeData = {
         "Tailwind CSS",
         "Vercel",
       ],
-      githubUrl: "https://github.com/example/generative-resume",
-      liveUrl: "https://generative-resume.vercel.app",
-    },
-    {
-      id: "commerce-ux",
-      title: "Edge Commerce Experience",
-      description:
-        "Global e-commerce storefront optimized with edge rendering and streaming interactions.",
-      impact:
-        "Improved conversion by 14 percent and reduced LCP from 2.9s to 1.6s in key markets.",
-      techStack: ["Next.js", "Vercel Edge", "PostgreSQL", "Stripe", "Redis"],
-      githubUrl: "https://github.com/example/edge-commerce",
-      liveUrl: "https://edge-commerce-demo.vercel.app",
-    },
-    {
-      id: "design-system",
-      title: "Multi-Brand Design System",
-      description:
-        "Component library and tokens pipeline for three product lines with shared primitives.",
-      impact:
-        "Cut feature delivery time by 30 percent through consistent UI and stronger code reuse.",
-      techStack: ["React", "TypeScript", "Storybook", "Tokens", "CI/CD"],
-      githubUrl: "https://github.com/example/multi-brand-design-system",
-      liveUrl: "https://design-system.example.dev",
+      githubUrl: "https://github.com/telosh/genUIAI",
+      liveUrl: "",
     },
   ] satisfies Project[],
   experience: [
     {
-      company: "Acme Inc.",
-      role: "Senior Frontend Engineer",
-      period: "2023 - Present",
+      company: "クラウドエース株式会社",
+      companyUrl: "https://cloud-ace.jp/",
+      role: "シニアアソシエイト",
+      period: "2024/04 - Present",
       highlights: [
-        "Led migration to Next.js App Router and server components.",
-        "Built AI-assisted onboarding flows with tool-driven UI.",
-        "Introduced performance budgets and reduced JS payload by 22 percent.",
-      ],
-    },
-    {
-      company: "Northstar Labs",
-      role: "Frontend Engineer",
-      period: "2020 - 2023",
-      highlights: [
-        "Created accessible component system adopted by 4 teams.",
-        "Implemented end-to-end testing strategy with Playwright.",
-        "Collaborated with design to improve mobile completion rates.",
+        "建材企業向け社内AIチャットアプリケーションの開発・保守を担当。",
+        "小売店向け従業員用QR認証システムを設計・実装。",
+        "病院関係の商品注文システムの開発に従事。",
       ],
     },
   ] satisfies Experience[],
