@@ -107,9 +107,6 @@ export function ChatLayout() {
             <div className="space-y-4">
               {messages.length === 0 ? (
                 <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
-                  <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-balance">
-                    {copy.chat.title}
-                  </h1>
                   <p className="max-w-md text-muted-foreground text-pretty">
                     {copy.chat.emptyState}
                   </p>
