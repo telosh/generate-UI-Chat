@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -42,6 +42,7 @@ export function ChatLayout() {
 
   const [toolMode, setToolMode] = useState<"single" | "multiple">("single");
   const [model, setModel] = useState<GeminiModelId>(DEFAULT_GEMINI_MODEL);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
     error,
@@ -62,13 +63,27 @@ export function ChatLayout() {
     setMessages([]);
   };
 
+  // ストリーミング中は最新コンテンツへ自動スクロール
+  useEffect(() => {
+    if (status !== "streaming") return;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [status, messages]);
+
   return (
     <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
       <AppHeader onNewChat={handleNewChat} showNewChat />
 
       {/* チャット表示領域: 画面全体を占有、スクロール可能（入力エリアの下まで描画） */}
       <main id="main-content" className="flex flex-1 min-h-0 flex-col overflow-hidden">
-        <div className="scrollbar-chat flex-1 overflow-y-auto overflow-x-hidden">
+        <div
+          ref={scrollContainerRef}
+          className="scrollbar-chat flex-1 overflow-y-auto overflow-x-hidden"
+        >
           <div className="mx-auto w-full max-w-3xl px-4 py-6 pb-32 sm:px-6 sm:py-8 sm:pb-36">
             {/* チャットヘッダー: メッセージあり時のみ表示 */}
             {messages.length > 0 ? (
@@ -109,23 +124,34 @@ export function ChatLayout() {
                   </div>
                 </div>
               ) : (
-                messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={
-                      reducedMotion ? false : { opacity: 0, y: 6 }
-                    }
-                    animate={
-                      reducedMotion ? {} : { opacity: 1, y: 0 }
-                    }
-                    transition={{
-                      duration: 0.2,
-                      delay: index * 0.03,
-                    }}
-                  >
-                    <ChatMessage message={message as never} />
-                  </motion.div>
-                ))
+                messages.map((message, index) => {
+                  const isLastMessage = index === messages.length - 1;
+                  const isLastAssistant =
+                    isLastMessage && message.role === "assistant";
+
+                  return (
+                    <motion.div
+                      key={message.id}
+                      initial={
+                        reducedMotion ? false : { opacity: 0, y: 6 }
+                      }
+                      animate={
+                        reducedMotion ? {} : { opacity: 1, y: 0 }
+                      }
+                      transition={{
+                        duration: 0.2,
+                        delay: index * 0.03,
+                      }}
+                    >
+                      <ChatMessage
+                        message={message as never}
+                        showStreamingCursor={
+                          status === "streaming" && isLastAssistant
+                        }
+                      />
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </div>

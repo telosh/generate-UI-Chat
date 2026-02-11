@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -27,10 +27,17 @@ export function ChatContainer() {
       transport,
     });
 
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
   const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
     error,
     clearError,
   });
+
+  useEffect(() => {
+    if (status !== "streaming") return;
+    scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [status, messages]);
 
   return (
     <Card className="rounded-2xl shadow-sm">
@@ -48,16 +55,30 @@ export function ChatContainer() {
                 Ask me about skills, architecture decisions, projects, or hiring fit.
               </p>
             ) : (
-              messages.map((message, index) => (
-                <motion.div
-                  key={message.id}
-                  initial={reducedMotion ? false : { opacity: 0, y: 6 }}
-                  animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.03 }}
-                >
-                  <ChatMessage message={message as never} />
-                </motion.div>
-              ))
+              <>
+                {messages.map((message, index) => {
+                  const isLastAssistant =
+                    index === messages.length - 1 &&
+                    message.role === "assistant";
+
+                  return (
+                    <motion.div
+                      key={message.id}
+                      initial={reducedMotion ? false : { opacity: 0, y: 6 }}
+                      animate={reducedMotion ? {} : { opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.03 }}
+                    >
+                      <ChatMessage
+                        message={message as never}
+                        showStreamingCursor={
+                          status === "streaming" && isLastAssistant
+                        }
+                      />
+                    </motion.div>
+                  );
+                })}
+                <div ref={scrollAnchorRef} aria-hidden />
+              </>
             )}
           </div>
         </ScrollArea>
