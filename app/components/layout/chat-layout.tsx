@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChatInput } from "@/app/components/chat/chat-input";
 import { ChatMessage } from "@/app/components/chat/chat-message";
+import { PhaseIndicator } from "@/app/components/chat/phase-indicator";
 import { SuggestedPrompts } from "@/app/components/chat/suggested-prompts";
 import { AppHeader } from "@/app/components/layout/app-header";
 import { useQuotaRetryCountdown } from "@/app/hooks/use-quota-retry-countdown";
@@ -38,11 +39,26 @@ export function ChatLayout() {
   const { messages, sendMessage, setMessages, status, error, clearError } =
     useChat<UIMessage>({
       transport,
+      onData: (dataPart) => {
+        if (
+          dataPart.type === "data-phase" &&
+          dataPart.data &&
+          typeof dataPart.data === "object"
+        ) {
+          const data = dataPart.data as { phase?: string };
+          setPhase(
+            (data.phase as "searching" | "generating-ui" | "complete") ?? null,
+          );
+        }
+      },
     });
 
   const [toolMode, setToolMode] = useState<"single" | "multiple">("single");
   const [searchMode, setSearchMode] = useState(false);
   const [model, setModel] = useState<GeminiModelId>(DEFAULT_GEMINI_MODEL);
+  const [phase, setPhase] = useState<
+    "searching" | "generating-ui" | "complete" | null
+  >(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
@@ -74,6 +90,11 @@ export function ChatLayout() {
       behavior: "smooth",
     });
   }, [status, messages]);
+
+  // ストリーミング終了時は phase をクリア（transient の PhaseIndicator を消す）
+  useEffect(() => {
+    if (status !== "streaming") setPhase(null);
+  }, [status]);
 
   return (
     <div className="relative flex h-dvh max-h-dvh flex-col overflow-hidden">
@@ -107,14 +128,14 @@ export function ChatLayout() {
 
             <div className="space-y-4">
               {messages.length === 0 ? (
-                <div className="flex min-h-[60vh] flex-col items-center justify-center gap-8 py-12 text-center">
-                  <p className="max-w-md text-muted-foreground text-pretty">
+                <div className="flex min-h-[60vh] flex-col items-center justify-center gap-10 py-12 text-center">
+                  <p className="max-w-md text-muted-foreground text-pretty text-base leading-relaxed">
                     {searchMode
                       ? copy.chat.emptyStateSearch
                       : copy.chat.emptyState}
                   </p>
-                  <div className="w-full max-w-xl space-y-4">
-                    <p className="text-sm text-muted-foreground">
+                  <div className="w-full max-w-xl space-y-5">
+                    <p className="text-sm font-medium text-foreground/80">
                       {searchMode
                         ? copy.chat.startPromptSearch
                         : copy.chat.startPrompt}
@@ -134,34 +155,55 @@ export function ChatLayout() {
                   </div>
                 </div>
               ) : (
-                messages.map((message, index) => {
-                  const isLastMessage = index === messages.length - 1;
-                  const isLastAssistant =
-                    isLastMessage && message.role === "assistant";
+                <>
+                  {messages.map((message, index) => {
+                    const isLastMessage = index === messages.length - 1;
+                    const isLastAssistant =
+                      isLastMessage && message.role === "assistant";
 
-                  return (
-                    <motion.div
-                      key={message.id}
-                      initial={
-                        reducedMotion ? false : { opacity: 0, y: 6 }
-                      }
-                      animate={
-                        reducedMotion ? {} : { opacity: 1, y: 0 }
-                      }
-                      transition={{
-                        duration: 0.2,
-                        delay: index * 0.03,
-                      }}
-                    >
-                      <ChatMessage
-                        message={message as never}
-                        showStreamingCursor={
-                          status === "streaming" && isLastAssistant
+                    return (
+                      <motion.div
+                        key={message.id}
+                        initial={
+                          reducedMotion ? false : { opacity: 0, y: 6 }
                         }
-                      />
-                    </motion.div>
-                  );
-                })
+                        animate={
+                          reducedMotion ? {} : { opacity: 1, y: 0 }
+                        }
+                        transition={{
+                          duration: 0.2,
+                          delay: index * 0.03,
+                        }}
+                      >
+                        <ChatMessage
+                          message={message as never}
+                          showStreamingCursor={
+                            status === "streaming" && isLastAssistant
+                          }
+                          activePhase={
+                            phase && phase !== "complete" ? phase : undefined
+                          }
+                        />
+                      </motion.div>
+                    );
+                  })}
+                  {/* 生成中: transient の data-phase を onData で受け、1つだけ表示 */}
+                  {phase &&
+                    phase !== "complete" &&
+                    (status === "streaming" || status === "submitted") && (
+                      <motion.div
+                        initial={
+                          reducedMotion ? false : { opacity: 0, y: 6 }
+                        }
+                        animate={
+                          reducedMotion ? {} : { opacity: 1, y: 0 }
+                        }
+                        transition={{ duration: 0.2 }}
+                      >
+                        <PhaseIndicator data={{ phase }} />
+                      </motion.div>
+                    )}
+                </>
               )}
             </div>
           </div>

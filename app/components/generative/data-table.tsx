@@ -17,10 +17,12 @@ export function DataTable({ title, columns, rows }: DataTableProps) {
   }
 
   return (
-    <Card>
+    <Card className="border-border/50">
       {title && (
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold tracking-tight">
+            {title}
+          </CardTitle>
         </CardHeader>
       )}
       <CardContent className="overflow-x-auto">

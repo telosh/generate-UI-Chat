@@ -18,19 +18,21 @@ export function BarChart({ title, items }: BarChartProps) {
   if (!items.length) return null;
 
   return (
-    <Card>
+    <Card className="border-border/50">
       {title && (
-        <CardHeader>
-          <CardTitle>{title}</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold tracking-tight">
+            {title}
+          </CardTitle>
         </CardHeader>
       )}
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 pt-0">
         {items.map((item) => (
           <div key={item.name} className="space-y-1">
             <div className="flex items-center justify-between text-sm">
               <span>{item.name}</span>
               <span className="font-mono tabular-nums text-muted-foreground">
-                {item.value}%
+                {item.subtitle ?? `${item.value}%`}
               </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">

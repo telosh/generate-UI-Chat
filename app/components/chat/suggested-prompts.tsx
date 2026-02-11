@@ -17,14 +17,14 @@ export function SuggestedPrompts({
 }) {
   const prompts = searchMode ? copy.searchPrompts : copy.prompts;
   return (
-    <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className={cn("flex flex-wrap gap-2 justify-center", className)}>
       {prompts.map((prompt) => (
         <Button
           key={prompt}
           variant="outline"
           size="sm"
           disabled={disabled}
-          className="touch-manipulation min-h-[44px] sm:min-h-0 transition-colors duration-200"
+          className="touch-manipulation min-h-[44px] sm:min-h-0 transition-all duration-200 hover:border-primary/30 hover:bg-muted/30 rounded-xl px-4"
           onClick={() => !disabled && onSelect(prompt)}
         >
           {prompt}

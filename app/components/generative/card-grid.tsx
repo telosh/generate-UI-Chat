@@ -36,7 +36,7 @@ export function CardGrid({ title, cards }: CardGridProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden border-border/50 transition-shadow hover:shadow-md">
               <CardHeader className="space-y-2">
                 <CardTitle className="text-lg">{card.title || "無題"}</CardTitle>
                 <p className="text-sm text-muted-foreground">
