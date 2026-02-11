@@ -30,6 +30,13 @@ export function ContactCard({ profile }: ContactCardProps) {
               LinkedIn
             </a>
           </Button>
+          {profile.contact.x && (
+            <Button asChild size="sm" variant="outline">
+              <a href={profile.contact.x} target="_blank" rel="noreferrer">
+                X
+              </a>
+            </Button>
+          )}
           <Button asChild size="sm">
             <a href={`mailto:${profile.contact.email}`}>Email Me</a>
           </Button>
