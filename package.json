@@ -7,7 +7,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "lint:strict": "eslint . --max-warnings=0",
+    "check": "pnpm lint:strict && pnpm typecheck && pnpm build",
+    "commit": "cz",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/google": "2.0.34",
@@ -31,14 +36,67 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
+    "@commitlint/cli": "20.4.1",
+    "@commitlint/config-conventional": "20.4.1",
     "@tailwindcss/postcss": "4.1.16",
     "@types/node": "20.19.22",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "commitizen": "4.3.1",
+    "cz-git": "1.12.0",
     "eslint": "9.38.0",
     "eslint-config-next": "16.1.6",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "prettier": "3.8.1",
     "tailwindcss": "4.1.16",
     "tw-animate-css": "1.4.0",
     "typescript": "5.9.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "pnpm eslint --fix --max-warnings=0"
+    ],
+    "*.{md,css}": [
+      "pnpm exec prettier --write --ignore-unknown"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-git"
+    }
+  },
+  "cz-git": {
+    "alias": {
+      "feat": "feat: 新機能",
+      "fix": "fix: バグ修正",
+      "docs": "docs: ドキュメント",
+      "style": "style: 形式修正",
+      "refactor": "refactor: リファクタ",
+      "perf": "perf: 性能改善",
+      "test": "test: テスト",
+      "build": "build: ビルド/依存関係",
+      "ci": "ci: CI設定",
+      "chore": "chore: 雑務",
+      "revert": "revert: 差し戻し"
+    },
+    "messages": {
+      "type": "コミット種別を選択してください:",
+      "scope": "スコープを入力してください (任意):",
+      "subject": "要約を入力してください (必須):",
+      "body": "詳細説明を入力してください (任意):",
+      "breaking": "破壊的変更の説明を入力してください (任意):",
+      "footerPrefixesSelect": "関連チケット接頭辞を選択してください (任意):",
+      "customFooterPrefix": "カスタム接頭辞を入力してください:",
+      "footer": "関連チケットを入力してください (例: #123):",
+      "confirmCommit": "この内容でコミットしますか?"
+    },
+    "allowCustomScopes": true,
+    "allowEmptyScopes": true,
+    "allowBreakingChanges": [
+      "feat",
+      "fix"
+    ],
+    "subjectLimit": 100
   }
 }
