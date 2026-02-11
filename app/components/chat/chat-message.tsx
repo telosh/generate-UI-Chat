@@ -127,385 +127,442 @@ export function ChatMessage({ message, showStreamingCursor = false }: ChatMessag
           {isUser ? copy.message.you : copy.message.assistant}
         </span>
 
-        <div className="flex w-full flex-col gap-3">
-          {message.parts.map((part, index) => {
-            const type = part.type;
-
-            if (type === "text" && typeof part.text === "string") {
-              const isLastPart = index === message.parts.length - 1;
-              const showCursor =
-                showStreamingCursor && !isUser && isLastPart;
-
-              return (
-                <MessageBubble key={`${message.id}-text-${index}`} isUser={isUser}>
-                  <div
-                    className={cn(
-                      "prose prose-sm last:mb-0",
-                      isUser ? "prose-invert" : "dark:prose-invert",
-                    )}
-                  >
-                    <ReactMarkdown>{part.text}</ReactMarkdown>
-                    {showCursor && (
-                      <span
-                        className="ml-0.5 inline-block h-4 w-0.5 animate-cursor-blink bg-current"
-                        aria-hidden
-                      />
-                    )}
-                  </div>
-                </MessageBubble>
-              );
-            }
-
-            if (type === "tool-showCards") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-cards-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-cards-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  cards: Array<{
-                    id: string;
-                    title: string;
-                    description: string;
-                    badges?: string[];
-                    links?: Array<{ label: string; url: string }>;
-                  }>;
-                };
-                return (
-                  <CardGrid
-                    key={`${message.id}-cards-${index}`}
-                    title={output.title ?? undefined}
-                    cards={output.cards ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showChart") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-chart-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-chart-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  items: Array<{ name: string; value: number; subtitle?: string }>;
-                };
-                return (
-                  <BarChart
-                    key={`${message.id}-chart-${index}`}
-                    title={output.title ?? undefined}
-                    items={output.items ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showTimeline") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-timeline-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-timeline-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  items: Array<{ title: string; subtitle: string; points?: string[] }>;
-                };
-                return (
-                  <Timeline
-                    key={`${message.id}-timeline-${index}`}
-                    title={output.title ?? undefined}
-                    items={output.items ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showProfile") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-profile-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-profile-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  name: string;
-                  role?: string | null;
-                  summary?: string | null;
-                  links?: Array<{ label: string; url: string }>;
-                };
-                return (
-                  <ProfileCard
-                    key={`${message.id}-profile-${index}`}
-                    name={output.name ?? ""}
-                    role={output.role ?? undefined}
-                    summary={output.summary ?? undefined}
-                    links={output.links ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showTable") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-table-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-table-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  columns: string[];
-                  rows: (string | number)[][];
-                };
-                return (
-                  <DataTable
-                    key={`${message.id}-table-${index}`}
-                    title={output.title ?? undefined}
-                    columns={output.columns ?? []}
-                    rows={output.rows ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showStats") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-stats-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-stats-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  items: Array<{ label: string; value: string | number }>;
-                };
-                return (
-                  <StatsGrid
-                    key={`${message.id}-stats-${index}`}
-                    title={output.title ?? undefined}
-                    items={output.items ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showList") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-list-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-list-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  items: string[];
-                  style: "bulleted" | "numbered" | "checklist";
-                };
-                return (
-                  <StyledList
-                    key={`${message.id}-list-${index}`}
-                    title={output.title ?? undefined}
-                    items={output.items ?? []}
-                    style={output.style ?? "bulleted"}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showComparison") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-comparison-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-comparison-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  items: Array<{ name: string; pros: string[]; cons?: string[] }>;
-                };
-                return (
-                  <ComparisonCard
-                    key={`${message.id}-comparison-${index}`}
-                    title={output.title ?? undefined}
-                    items={output.items ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showSteps") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-steps-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-steps-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  title?: string | null;
-                  steps: Array<{ step: number; title: string; description: string }>;
-                };
-                return (
-                  <StepsGuide
-                    key={`${message.id}-steps-${index}`}
-                    title={output.title ?? undefined}
-                    steps={output.steps ?? []}
-                  />
-                );
-              }
-            }
-
-            if (type === "tool-showQuote") {
-              if (
-                part.state === "input-streaming" ||
-                part.state === "input-available"
-              ) {
-                return (
-                  <MessageBubble key={`${message.id}-quote-loading-${index}`} isUser={false}>
-                    <ToolLoading label={getToolLoadingLabel(type)} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-error") {
-                return (
-                  <MessageBubble key={`${message.id}-quote-error-${index}`} isUser={false}>
-                    <ToolError errorText={String(part.errorText ?? "")} />
-                  </MessageBubble>
-                );
-              }
-              if (part.state === "output-available" && part.output) {
-                const output = part.output as {
-                  text: string;
-                  source?: string | null;
-                  variant?: "default" | "info" | "success" | "warning";
-                };
-                return (
-                  <QuoteCard
-                    key={`${message.id}-quote-${index}`}
-                    text={output.text ?? ""}
-                    source={output.source ?? undefined}
-                    variant={output.variant ?? "default"}
-                  />
-                );
-              }
-            }
-
-            return null;
-          })}
+        <div
+          className={cn(
+            "flex w-full flex-col",
+            isUser ? "gap-3" : "gap-0",
+          )}
+        >
+          {isUser ? (
+            // ユーザー: 各パートを個別のバブルで表示
+            message.parts.map((part, index) =>
+              renderPart(part, message, index, isUser, showStreamingCursor),
+            )
+          ) : (
+            // アシスタント: 全パートを1つの応答ブロックとして統合表示
+            <div className="space-y-4 rounded-2xl bg-muted/80 px-4 py-3">
+              {message.parts.map((part, index) =>
+                renderAssistantPart(part, message, index, showStreamingCursor),
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/** ユーザーメッセージ用: 各パートを MessageBubble でラップ */
+function renderPart(
+  part: Record<string, unknown>,
+  message: AnyMessage,
+  index: number,
+  isUser: boolean,
+  showStreamingCursor: boolean,
+): React.ReactNode {
+  const type = part.type;
+
+  if (type === "text" && typeof part.text === "string") {
+    const isLastPart = index === message.parts.length - 1;
+    const showCursor = showStreamingCursor && !isUser && isLastPart;
+
+    return (
+      <MessageBubble key={`${message.id}-text-${index}`} isUser={isUser}>
+        <div
+          className={cn(
+            "prose prose-sm last:mb-0",
+            isUser ? "prose-invert" : "dark:prose-invert",
+          )}
+        >
+          <ReactMarkdown>{part.text}</ReactMarkdown>
+          {showCursor && (
+            <span
+              className="ml-0.5 inline-block h-4 w-0.5 animate-cursor-blink bg-current"
+              aria-hidden
+            />
+          )}
+        </div>
+      </MessageBubble>
+    );
+  }
+
+  return null;
+}
+
+/** アシスタントメッセージ用: 統合ブロック内にコンテンツのみ（MessageBubble なし） */
+function renderAssistantPart(
+  part: Record<string, unknown>,
+  message: AnyMessage,
+  index: number,
+  showStreamingCursor: boolean,
+): React.ReactNode {
+  const type = part.type;
+
+  if (type === "text" && typeof part.text === "string") {
+    const isLastPart = index === message.parts.length - 1;
+    const showCursor = showStreamingCursor && isLastPart;
+
+    return (
+      <div
+        key={`${message.id}-text-${index}`}
+        className="prose prose-sm last:mb-0 dark:prose-invert"
+      >
+        <ReactMarkdown>{part.text}</ReactMarkdown>
+        {showCursor && (
+          <span
+            className="ml-0.5 inline-block h-4 w-0.5 animate-cursor-blink bg-current"
+            aria-hidden
+          />
+        )}
+      </div>
+    );
+  }
+
+  if (type === "tool-showCards") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-cards-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-cards-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        cards: Array<{
+          id: string;
+          title: string;
+          description: string;
+          badges?: string[];
+          links?: Array<{ label: string; url: string }>;
+        }>;
+      };
+      return (
+        <CardGrid
+          key={`${message.id}-cards-${index}`}
+          title={output.title ?? undefined}
+          cards={output.cards ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showChart") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-chart-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-chart-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        items: Array<{ name: string; value: number; subtitle?: string }>;
+      };
+      return (
+        <BarChart
+          key={`${message.id}-chart-${index}`}
+          title={output.title ?? undefined}
+          items={output.items ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showTimeline") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-timeline-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-timeline-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        items: Array<{ title: string; subtitle: string; points?: string[] }>;
+      };
+      return (
+        <Timeline
+          key={`${message.id}-timeline-${index}`}
+          title={output.title ?? undefined}
+          items={output.items ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showProfile") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-profile-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-profile-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        name: string;
+        role?: string | null;
+        summary?: string | null;
+        links?: Array<{ label: string; url: string }>;
+      };
+      return (
+        <ProfileCard
+          key={`${message.id}-profile-${index}`}
+          name={output.name ?? ""}
+          role={output.role ?? undefined}
+          summary={output.summary ?? undefined}
+          links={output.links ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showTable") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-table-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-table-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        columns: string[];
+        rows: (string | number)[][];
+      };
+      return (
+        <DataTable
+          key={`${message.id}-table-${index}`}
+          title={output.title ?? undefined}
+          columns={output.columns ?? []}
+          rows={output.rows ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showStats") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-stats-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-stats-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        items: Array<{ label: string; value: string | number }>;
+      };
+      return (
+        <StatsGrid
+          key={`${message.id}-stats-${index}`}
+          title={output.title ?? undefined}
+          items={output.items ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showList") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-list-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-list-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        items: string[];
+        style: "bulleted" | "numbered" | "checklist";
+      };
+      return (
+        <StyledList
+          key={`${message.id}-list-${index}`}
+          title={output.title ?? undefined}
+          items={output.items ?? []}
+          style={output.style ?? "bulleted"}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showComparison") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-comparison-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-comparison-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        items: Array<{ name: string; pros: string[]; cons?: string[] }>;
+      };
+      return (
+        <ComparisonCard
+          key={`${message.id}-comparison-${index}`}
+          title={output.title ?? undefined}
+          items={output.items ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showSteps") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-steps-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-steps-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        title?: string | null;
+        steps: Array<{ step: number; title: string; description: string }>;
+      };
+      return (
+        <StepsGuide
+          key={`${message.id}-steps-${index}`}
+          title={output.title ?? undefined}
+          steps={output.steps ?? []}
+        />
+      );
+    }
+  }
+
+  if (type === "tool-showQuote") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-quote-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
+    if (part.state === "output-error") {
+      return (
+        <div key={`${message.id}-quote-error-${index}`}>
+          <ToolError errorText={String(part.errorText ?? "")} />
+        </div>
+      );
+    }
+    if (part.state === "output-available" && part.output) {
+      const output = part.output as {
+        text: string;
+        source?: string | null;
+        variant?: "default" | "info" | "success" | "warning";
+      };
+      return (
+        <QuoteCard
+          key={`${message.id}-quote-${index}`}
+          text={output.text ?? ""}
+          source={output.source ?? undefined}
+          variant={output.variant ?? "default"}
+        />
+      );
+    }
+  }
+
+  return null;
 }
