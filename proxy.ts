@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { geolocation } from "@vercel/functions";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const geo = geolocation(request);
   const city = encodeURIComponent(geo.city ?? "World");
   const country = geo.country ?? "Global";
