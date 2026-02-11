@@ -66,6 +66,12 @@ export function AppHeader({
         </div>
         <Link
           href="/"
+          onClick={(e) => {
+            if (onNewChat && pathname === "/") {
+              e.preventDefault();
+              onNewChat();
+            }
+          }}
           className="flex justify-self-center items-center gap-2 font-semibold tracking-tight hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
         >
           <span className="hidden sm:inline">{copy.sidebar.title}</span>
