@@ -35,10 +35,10 @@ export function BarChart({ title, items }: BarChartProps) {
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <motion.div
-                initial={reducedMotion ? false : { width: 0 }}
-                animate={{ width: `${Math.min(100, item.value)}%` }}
+                initial={reducedMotion ? false : { scaleX: 0 }}
+                animate={{ scaleX: Math.min(100, item.value) / 100 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
-                className="h-full rounded-full bg-primary"
+                className="h-full w-full origin-left rounded-full bg-primary"
               />
             </div>
             {item.subtitle && (

@@ -35,10 +35,10 @@ export function SkillChart({ category, skills }: SkillChartProps) {
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <motion.div
-                initial={reducedMotion ? false : { width: 0 }}
-                animate={{ width: `${skill.level}%` }}
+                initial={reducedMotion ? false : { scaleX: 0 }}
+                animate={{ scaleX: skill.level / 100 }}
                 transition={{ duration: 0.45, ease: "easeOut" }}
-                className="h-full rounded-full bg-primary"
+                className="h-full w-full origin-left rounded-full bg-primary"
               />
             </div>
             <p className="text-xs text-muted-foreground">
