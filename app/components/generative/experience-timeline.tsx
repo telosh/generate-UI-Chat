@@ -24,7 +24,19 @@ export function ExperienceTimeline({ items }: { items: Experience[] }) {
             <div className="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full bg-primary" />
             <p className="font-medium">{item.role}</p>
             <p className="text-sm text-muted-foreground">
-              {item.company} · {item.period}
+              {item.companyUrl ? (
+                <a
+                  href={item.companyUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline underline-offset-2 hover:text-foreground transition-colors"
+                >
+                  {item.company}
+                </a>
+              ) : (
+                item.company
+              )}{" "}
+              · {item.period}
             </p>
             <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-muted-foreground">
               {item.highlights.map((highlight) => (
