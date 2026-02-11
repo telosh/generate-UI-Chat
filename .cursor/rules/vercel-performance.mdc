@@ -1,0 +1,26 @@
+---
+description: Vercel performance and rendering optimization
+globs: app/**/*.{ts,tsx} components/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Vercel Performance Rules
+
+## Data Fetching
+- Use `next: { revalidate }` or `cache: 'force-cache'` for fetch
+- Add `next: { tags }` for on-demand revalidation
+- Never call `fetch` in middleware
+
+## Images
+- Use `next/image` with explicit `width` and `height`
+- Prevents CLS; enables Vercel Image Optimization (AVIF, WebP)
+
+## Animations
+- Animate only `transform`, `opacity`
+- Never animate `width`, `height`, `top`, `left`
+- Never use `transition: all`
+
+## Streaming
+- Use Suspense for deferred data
+- Show loading skeleton immediately; stream content
+- Reduces TTFB and improves perceived performance

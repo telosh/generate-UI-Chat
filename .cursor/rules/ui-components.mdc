@@ -1,0 +1,25 @@
+---
+description: UI component patterns for genUIAI
+globs: app/components/**/*.tsx components/**/*.tsx
+alwaysApply: false
+---
+
+# UI Component Conventions
+
+## General
+- Use Vercel Design Guidelines (see AGENTS.md)
+- Prefer semantic HTML; add `aria-label` for icon-only buttons
+- Loading states: append `…` (e.g. "Send…", "Loading…")
+- Placeholders: end with `…` and show example pattern
+
+## Generative Components
+- Use `useReducedMotion()` from framer-motion for accessibility
+- Animate only `opacity` and `transform`; never layout props
+- Empty states: show helpful message with recovery path
+- Cards: consistent `rounded-2xl`, `shadow-sm` for hierarchy
+
+## Chat
+- Chat input: `text-base` (≥16px) for mobile
+- Suggested prompts: `min-h-[44px]` on mobile for touch targets
+- Error messages: `aria-live="polite"` for screen readers
+- Links in `<a>` or `<Link>`; never `<button>` for navigation
