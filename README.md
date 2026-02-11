@@ -1,13 +1,14 @@
-## Interactive Generative Resume
+## genUIAI - 自動生成UI検証サイト
 
-Next.js + Vercel + AI SDK で構築した、生成UIベースのポートフォリオです。  
-採用担当者が自然言語で質問すると、テキストだけでなくプロジェクトカードやスキル可視化などのUIがストリーミング表示されます。
+Next.js + Vercel + AI SDK で構築した、**Generative UI の検証・デモ用サイト**です。  
+チャットで質問すると、テキストだけでなくプロジェクトカード・スキルチャート・タイムラインなどのUIがストリーミングで動的生成されます。自動生成UIの動作検証やデモに使用できます。
 
 ### 主な機能
 
-- Edge Middleware によるジオロケーション挨拶
 - AI SDK (`streamText` + tool calling) による Generative UI
-- ダークモード / ライトモード切り替え
+- ストリーミングでカード・チャート・タイムラインを動的生成
+- スムーズなダーク/ライトモード切り替え
+- Edge Middleware によるジオロケーション挨拶
 - 動的 OGP (`@vercel/og`)
 - Upstash レート制限（有効時）
 
@@ -35,6 +36,8 @@ cp .env.example .env.local
 
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
+- `RATE_LIMIT_REQUESTS` — ウィンドウ内の最大リクエスト数（デフォルト: 20）
+- `RATE_LIMIT_WINDOW` — ウィンドウ（例: `1 h`, `1 m`, `1 d`）
 
 ### 3) Run locally
 
@@ -71,6 +74,8 @@ vercel --prod
 - `GOOGLE_GENERATIVE_AI_API_KEY` (Required)
 - `UPSTASH_REDIS_REST_URL` (Optional)
 - `UPSTASH_REDIS_REST_TOKEN` (Optional)
+- `RATE_LIMIT_REQUESTS` (Optional, default: 20)
+- `RATE_LIMIT_WINDOW` (Optional, default: `1 h`)
 
 ## 技術構成
 
