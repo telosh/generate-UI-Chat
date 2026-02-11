@@ -22,7 +22,7 @@ export async function GET(request: Request) {
           fontFamily: "sans-serif",
         }}
       >
-        <div style={{ fontSize: 24, opacity: 0.8 }}>Interactive Generative Resume</div>
+        <div style={{ fontSize: 24, opacity: 0.8 }}>genUIAI - 自動生成UI検証サイト</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1.1 }}>
             Frontend Engineer
