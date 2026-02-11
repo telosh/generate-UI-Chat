@@ -1,16 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  DefaultChatTransport,
-  type UIMessage,
-} from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatInput } from "@/app/components/chat/chat-input";
 import { ChatMessage } from "@/app/components/chat/chat-message";
+import { useQuotaRetryCountdown } from "@/app/hooks/use-quota-retry-countdown";
+import { formatChatError } from "@/app/lib/chat/format-error";
 import { SuggestedPrompts } from "@/app/components/chat/suggested-prompts";
 
 export function ChatContainer() {
@@ -23,14 +22,20 @@ export function ChatContainer() {
     [],
   );
 
-  const { messages, sendMessage, status, error } = useChat<UIMessage>({
-    transport,
+  const { messages, sendMessage, status, error, clearError } =
+    useChat<UIMessage>({
+      transport,
+    });
+
+  const { remainingSeconds, totalSeconds } = useQuotaRetryCountdown({
+    error,
+    clearError,
   });
 
   return (
-    <Card className="rounded-2xl">
+    <Card className="rounded-2xl shadow-sm">
       <CardHeader className="space-y-3">
-        <CardTitle>Interactive Generative Resume</CardTitle>
+        <CardTitle id="chat-heading">Interactive Generative Resume</CardTitle>
         <SuggestedPrompts
           onSelect={(prompt) => sendMessage({ parts: [{ type: "text", text: prompt }] })}
         />
@@ -57,13 +62,45 @@ export function ChatContainer() {
           </div>
         </ScrollArea>
         {error ? (
-          <p className="text-sm text-destructive" aria-live="polite">
-            {error.message}
-          </p>
+          <div className="space-y-2" role="alert" aria-live="polite">
+            <p className="text-sm text-destructive">
+              {formatChatError(error)}
+            </p>
+            {remainingSeconds !== null &&
+              totalSeconds !== null &&
+              totalSeconds > 0 && (
+                <div
+                  className="h-1.5 overflow-hidden rounded-full bg-muted"
+                  aria-hidden
+                >
+                  <motion.div
+                    className="h-full rounded-full bg-primary/60"
+                    initial={{ width: "100%" }}
+                    animate={{
+                      width: `${(remainingSeconds / totalSeconds) * 100}%`,
+                    }}
+                    transition={
+                      reducedMotion
+                        ? { duration: 0 }
+                        : { duration: 1, ease: "linear" }
+                    }
+                  />
+                </div>
+              )}
+          </div>
         ) : null}
         <ChatInput
-          disabled={status === "streaming" || status === "submitted"}
-          onSubmit={(value) => sendMessage({ parts: [{ type: "text", text: value }] })}
+          disabled={
+            status === "streaming" ||
+            status === "submitted" ||
+            (error !== undefined &&
+              remainingSeconds !== null &&
+              remainingSeconds > 0)
+          }
+          retrySeconds={remainingSeconds}
+          onSubmit={(value) =>
+            sendMessage({ parts: [{ type: "text", text: value }] })
+          }
         />
       </CardContent>
     </Card>

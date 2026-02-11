@@ -1,25 +1,22 @@
 import { Button } from "@/components/ui/button";
-
-const prompts = [
-  "Show your frontend skills",
-  "Show projects built with Next.js",
-  "What impact have you created?",
-  "How can I contact you?",
-];
+import { copy } from "@/app/lib/ui/copy";
+import { cn } from "@/lib/utils";
 
 export function SuggestedPrompts({
   onSelect,
+  className,
 }: {
   onSelect: (prompt: string) => void;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {prompts.map((prompt) => (
+    <div className={cn("flex flex-wrap gap-2", className)}>
+      {copy.prompts.map((prompt) => (
         <Button
           key={prompt}
           variant="outline"
           size="sm"
-          className="touch-manipulation"
+          className="touch-manipulation min-h-[44px] sm:min-h-0 transition-colors duration-200"
           onClick={() => onSelect(prompt)}
         >
           {prompt}

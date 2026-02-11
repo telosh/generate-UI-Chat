@@ -2,12 +2,19 @@
 
 import ReactMarkdown from "react-markdown";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import { ProjectCard } from "@/app/components/generative/project-card";
-import { SkillChart } from "@/app/components/generative/skill-chart";
-import { ExperienceTimeline } from "@/app/components/generative/experience-timeline";
-import { ContactCard } from "@/app/components/generative/contact-card";
-import { GithubRepos } from "@/app/components/generative/github-repos";
+import { copy } from "@/app/lib/ui/copy";
+import { User, Bot } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { CardGrid } from "@/app/components/generative/card-grid";
+import { BarChart } from "@/app/components/generative/bar-chart";
+import { Timeline } from "@/app/components/generative/timeline";
+import { ProfileCard } from "@/app/components/generative/profile-card";
+import { DataTable } from "@/app/components/generative/data-table";
+import { StatsGrid } from "@/app/components/generative/stats-grid";
+import { StyledList } from "@/app/components/generative/styled-list";
+import { ComparisonCard } from "@/app/components/generative/comparison-card";
+import { StepsGuide } from "@/app/components/generative/steps-guide";
+import { QuoteCard } from "@/app/components/generative/quote-card";
 
 type AnyMessage = {
   id: string;
@@ -25,124 +32,326 @@ function ToolLoading() {
   );
 }
 
-export function ChatMessage({ message }: { message: AnyMessage }) {
+function MessageBubble({
+  children,
+  isUser,
+}: {
+  children: React.ReactNode;
+  isUser: boolean;
+}) {
   return (
-    <article className="space-y-3 rounded-xl border p-4">
-      <header className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {message.role === "user" ? "You" : "Assistant"}
-      </header>
-      <div className="space-y-3">
-        {message.parts.map((part, index) => {
-          const type = part.type;
+    <div
+      className={cn(
+        "space-y-3 rounded-2xl px-4 py-3",
+        isUser
+          ? "bg-primary text-primary-foreground [&_a]:text-primary-foreground [&_a]:underline"
+          : "bg-muted/80",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
 
-          if (type === "text" && typeof part.text === "string") {
-            return (
-              <div key={`${message.id}-text-${index}`} className="prose prose-sm dark:prose-invert">
-                <ReactMarkdown>{part.text}</ReactMarkdown>
-              </div>
-            );
-          }
+export function ChatMessage({ message }: { message: AnyMessage }) {
+  const isUser = message.role === "user";
 
-          if (type === "tool-showProjects") {
-            if (part.state === "input-available") {
-              return <ToolLoading key={`${message.id}-projects-loading-${index}`} />;
-            }
-            if (part.state === "output-available" && part.output) {
-              const output = part.output as {
-                projects: Array<{
-                  id: string;
-                  title: string;
-                  description: string;
-                  impact: string;
-                  techStack: string[];
-                  githubUrl: string;
-                  liveUrl: string;
-                }>;
-              };
-
-              return (
-                <div key={`${message.id}-projects-${index}`} className="space-y-3">
-                  <ProjectCard projects={output.projects ?? []} />
-                  <GithubRepos projects={output.projects ?? []} />
-                </div>
-              );
-            }
-          }
-
-          if (type === "tool-showSkills") {
-            if (part.state === "input-available") {
-              return <ToolLoading key={`${message.id}-skills-loading-${index}`} />;
-            }
-            if (part.state === "output-available" && part.output) {
-              const output = part.output as {
-                category: "frontend" | "backend" | "cloud";
-                skills: Array<{ name: string; level: number; years: number }>;
-              };
-              return (
-                <SkillChart
-                  key={`${message.id}-skills-${index}`}
-                  category={output.category}
-                  skills={output.skills}
-                />
-              );
-            }
-          }
-
-          if (type === "tool-showExperience") {
-            if (part.state === "input-available") {
-              return <ToolLoading key={`${message.id}-exp-loading-${index}`} />;
-            }
-            if (part.state === "output-available" && part.output) {
-              const output = part.output as {
-                items: Array<{
-                  company: string;
-                  role: string;
-                  period: string;
-                  highlights: string[];
-                }>;
-              };
-              return (
-                <ExperienceTimeline
-                  key={`${message.id}-exp-${index}`}
-                  items={output.items ?? []}
-                />
-              );
-            }
-          }
-
-          if (type === "tool-showContact") {
-            if (part.state === "input-available") {
-              return <ToolLoading key={`${message.id}-contact-loading-${index}`} />;
-            }
-            if (part.state === "output-available" && part.output) {
-              const output = part.output as {
-                profile: {
-                  name: string;
-                  alias: string;
-                  role: string;
-                  summary: string;
-                  location: string;
-                  origin: string;
-                  contact: {
-                    email: string;
-                    website: string;
-                    github: string;
-                    linkedin: string;
-                    x: string;
-                  };
-                };
-              };
-
-              return (
-                <ContactCard key={`${message.id}-contact-${index}`} profile={output.profile} />
-              );
-            }
-          }
-
-          return null;
-        })}
+  return (
+    <div
+      className={cn(
+        "flex gap-3",
+        isUser ? "flex-row-reverse" : "flex-row",
+      )}
+    >
+      <div
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+        )}
+        aria-hidden
+      >
+        {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
       </div>
-      <Separator />
-    </article>
+
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 flex-col gap-2",
+          isUser ? "max-w-[85%] items-end sm:max-w-[75%]" : "items-start",
+        )}
+      >
+        <span className="text-xs font-medium text-muted-foreground">
+          {isUser ? copy.message.you : copy.message.assistant}
+        </span>
+
+        <div className="flex w-full flex-col gap-3">
+          {message.parts.map((part, index) => {
+            const type = part.type;
+
+            if (type === "text" && typeof part.text === "string") {
+              return (
+                <MessageBubble key={`${message.id}-text-${index}`} isUser={isUser}>
+                  <div
+                    className={cn(
+                      "prose prose-sm last:mb-0",
+                      isUser ? "prose-invert" : "dark:prose-invert",
+                    )}
+                  >
+                    <ReactMarkdown>{part.text}</ReactMarkdown>
+                  </div>
+                </MessageBubble>
+              );
+            }
+
+            if (type === "tool-showCards") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-cards-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  cards: Array<{
+                    id: string;
+                    title: string;
+                    description: string;
+                    badges?: string[];
+                    links?: Array<{ label: string; url: string }>;
+                  }>;
+                };
+                return (
+                  <CardGrid
+                    key={`${message.id}-cards-${index}`}
+                    title={output.title ?? undefined}
+                    cards={output.cards ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showChart") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-chart-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  items: Array<{ name: string; value: number; subtitle?: string }>;
+                };
+                return (
+                  <BarChart
+                    key={`${message.id}-chart-${index}`}
+                    title={output.title ?? undefined}
+                    items={output.items ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showTimeline") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-timeline-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  items: Array<{ title: string; subtitle: string; points?: string[] }>;
+                };
+                return (
+                  <Timeline
+                    key={`${message.id}-timeline-${index}`}
+                    title={output.title ?? undefined}
+                    items={output.items ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showProfile") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-profile-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  name: string;
+                  role?: string | null;
+                  summary?: string | null;
+                  links?: Array<{ label: string; url: string }>;
+                };
+                return (
+                  <ProfileCard
+                    key={`${message.id}-profile-${index}`}
+                    name={output.name ?? ""}
+                    role={output.role ?? undefined}
+                    summary={output.summary ?? undefined}
+                    links={output.links ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showTable") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-table-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  columns: string[];
+                  rows: (string | number)[][];
+                };
+                return (
+                  <DataTable
+                    key={`${message.id}-table-${index}`}
+                    title={output.title ?? undefined}
+                    columns={output.columns ?? []}
+                    rows={output.rows ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showStats") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-stats-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  items: Array<{ label: string; value: string | number }>;
+                };
+                return (
+                  <StatsGrid
+                    key={`${message.id}-stats-${index}`}
+                    title={output.title ?? undefined}
+                    items={output.items ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showList") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-list-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  items: string[];
+                  style: "bulleted" | "numbered" | "checklist";
+                };
+                return (
+                  <StyledList
+                    key={`${message.id}-list-${index}`}
+                    title={output.title ?? undefined}
+                    items={output.items ?? []}
+                    style={output.style ?? "bulleted"}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showComparison") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-comparison-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  items: Array<{ name: string; pros: string[]; cons?: string[] }>;
+                };
+                return (
+                  <ComparisonCard
+                    key={`${message.id}-comparison-${index}`}
+                    title={output.title ?? undefined}
+                    items={output.items ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showSteps") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-steps-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  title?: string | null;
+                  steps: Array<{ step: number; title: string; description: string }>;
+                };
+                return (
+                  <StepsGuide
+                    key={`${message.id}-steps-${index}`}
+                    title={output.title ?? undefined}
+                    steps={output.steps ?? []}
+                  />
+                );
+              }
+            }
+
+            if (type === "tool-showQuote") {
+              if (part.state === "input-available") {
+                return (
+                  <MessageBubble key={`${message.id}-quote-loading-${index}`} isUser={false}>
+                    <ToolLoading />
+                  </MessageBubble>
+                );
+              }
+              if (part.state === "output-available" && part.output) {
+                const output = part.output as {
+                  text: string;
+                  source?: string | null;
+                  variant?: "default" | "info" | "success" | "warning";
+                };
+                return (
+                  <QuoteCard
+                    key={`${message.id}-quote-${index}`}
+                    text={output.text ?? ""}
+                    source={output.source ?? undefined}
+                    variant={output.variant ?? "default"}
+                  />
+                );
+              }
+            }
+
+            return null;
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
