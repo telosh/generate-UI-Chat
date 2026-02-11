@@ -129,11 +129,12 @@ export async function POST(request: Request) {
       },
       execute: async ({ writer }) => {
         if (useSearch) {
-          // Phase 1: 検索中を表示
+          // Phase 1: 検索中を表示（transient: メッセージ履歴に残さず onData で扱う）
           writer.write({
             type: "data-phase",
             id: PHASE_ID,
             data: { phase: "searching" as const },
+            transient: true,
           });
 
           const searchResult = await generateText({
@@ -154,6 +155,7 @@ export async function POST(request: Request) {
               type: "data-phase",
               id: PHASE_ID,
               data: { phase: "complete" as const },
+              transient: true,
             });
             writer.write({
               type: "error",
@@ -167,6 +169,7 @@ export async function POST(request: Request) {
             type: "data-phase",
             id: PHASE_ID,
             data: { phase: "generating-ui" as const },
+            transient: true,
           });
 
           const lastUserContent = getLastUserMessageText(messages);
@@ -176,7 +179,11 @@ export async function POST(request: Request) {
             {
               role: "user" as const,
               content:
-                `上の検索結果を、ユーザーが求めた形式（チャート・表・カード・指標など）でUIツールを使って表示してください。\n元の質問: ${lastUserContent}`,
+                `上の検索結果を元に、以下を実行してください。\n` +
+                `1. 検索結果の要点・背景・数値の意味を文章で丁寧に説明する\n` +
+                `2. ユーザーが求めた形式（チャート・表・カード・指標など）でUIツールを使って表示する\n` +
+                `3. 1つのUIで終わらせず、関連する形式を複数組み合わせる（例: サマリー→チャート→表）\n` +
+                `元の質問: ${lastUserContent}`,
             },
           ];
 
@@ -185,13 +192,14 @@ export async function POST(request: Request) {
             system: buildSystemPrompt(true, "searchToUI"),
             messages: phase2Messages,
             tools: chatTools,
-            stopWhen: stepCountIs(1),
+            stopWhen: stepCountIs(5),
             providerOptions,
             onFinish: () => {
               writer.write({
                 type: "data-phase",
                 id: PHASE_ID,
                 data: { phase: "complete" as const },
+                transient: true,
               });
             },
           });
@@ -208,6 +216,7 @@ export async function POST(request: Request) {
             type: "data-phase",
             id: PHASE_ID,
             data: { phase: "generating-ui" as const },
+            transient: true,
           });
 
           const maxSteps = toolMode === "multiple" ? 5 : 1;
@@ -223,6 +232,7 @@ export async function POST(request: Request) {
                 type: "data-phase",
                 id: PHASE_ID,
                 data: { phase: "complete" as const },
+                transient: true,
               });
             },
           });
