@@ -34,21 +34,35 @@ export const chatTools = {
   }),
   showChart: tool({
     description:
-      "Show a bar chart. Use for スキル、比較、ランキング、割合、レベルなど.",
+      "Show a chart. chartType: bar=棒グラフ(価格比較・ランキング・割合), line=折れ線(価格推移・時系列), area=エリア(同様に推移), pie=円グラフ(割合・構成比)。ユーザーが「チャートで」「グラフで」と指定した場合は必ずこれを使う。",
     inputSchema: z.object({
       title: z.string().optional().describe("Chart title."),
+      chartType: z
+        .enum(["bar", "line", "area", "pie"])
+        .default("bar")
+        .describe(
+          "bar=棒(比較・ランキング), line=折れ線(推移・時系列), area=エリア(同様), pie=円(構成比)",
+        ),
       items: z
         .array(
           z.object({
-            name: z.string().describe("Item label."),
-            value: z.number().describe("Value 0-100 for bar width."),
-            subtitle: z.string().optional().describe("Additional info."),
+            name: z.string().describe("項目名（時系列では1月/2024-01など）。"),
+            value: z
+              .number()
+              .describe(
+                "bar/pie: 0-100相対値。line/area: 実数値でOK。価格はbarで正規化、line/areaでそのまま。",
+              ),
+            subtitle: z
+              .string()
+              .optional()
+              .describe("bar用: 実データ表示（例: 10,224,588 円）。"),
           }),
         )
         .describe("Chart items."),
     }),
-    execute: async ({ title, items }) => ({
+    execute: async ({ title, chartType, items }) => ({
       title: title ?? null,
+      chartType: chartType ?? "bar",
       items: items ?? [],
     }),
   }),

@@ -7,6 +7,9 @@ import { User, Bot, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CardGrid } from "@/app/components/generative/card-grid";
 import { BarChart } from "@/app/components/generative/bar-chart";
+import { LineChartComponent } from "@/app/components/generative/line-chart";
+import { AreaChartComponent } from "@/app/components/generative/area-chart";
+import { PieChartComponent } from "@/app/components/generative/pie-chart";
 import { Timeline } from "@/app/components/generative/timeline";
 import { ProfileCard } from "@/app/components/generative/profile-card";
 import { DataTable } from "@/app/components/generative/data-table";
@@ -15,7 +18,6 @@ import { StyledList } from "@/app/components/generative/styled-list";
 import { ComparisonCard } from "@/app/components/generative/comparison-card";
 import { StepsGuide } from "@/app/components/generative/steps-guide";
 import { QuoteCard } from "@/app/components/generative/quote-card";
-import { PhaseIndicator } from "@/app/components/chat/phase-indicator";
 
 type AnyMessage = {
   id: string;
@@ -47,12 +49,12 @@ function getToolLoadingLabel(toolType: string): string {
 
 function ToolLoading({ label }: { label: string }) {
   return (
-    <div className="space-y-2" role="status" aria-live="polite">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="space-y-3 rounded-xl border border-border/40 bg-muted/20 px-4 py-3" role="status" aria-live="polite">
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
       <div className="space-y-2">
-        <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="h-4 w-4/5" />
-        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-4 w-2/3 rounded-md" />
+        <Skeleton className="h-4 w-4/5 rounded-md" />
+        <Skeleton className="h-20 w-full rounded-lg" />
       </div>
     </div>
   );
@@ -83,10 +85,10 @@ function MessageBubble({
   return (
     <div
       className={cn(
-        "space-y-3 rounded-2xl px-4 py-3",
+        "space-y-3 rounded-2xl px-4 py-3 shadow-sm",
         isUser
           ? "bg-primary text-primary-foreground [&_a]:text-primary-foreground [&_a]:underline"
-          : "bg-muted/80",
+          : "border border-border/40 bg-muted/30",
       )}
     >
       {children}
@@ -98,9 +100,15 @@ type ChatMessageProps = {
   message: AnyMessage;
   /** ストリーミング中でこのメッセージが最後のアシスタントメッセージのとき、テキストにカーソル表示 */
   showStreamingCursor?: boolean;
+  /** レイアウトで管理するフェーズ（searching/generating-ui のとき ToolLoading を非表示） */
+  activePhase?: "searching" | "generating-ui";
 };
 
-export function ChatMessage({ message, showStreamingCursor = false }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  showStreamingCursor = false,
+  activePhase,
+}: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
@@ -112,8 +120,8 @@ export function ChatMessage({ message, showStreamingCursor = false }: ChatMessag
     >
       <div
         className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full ring-2 ring-background",
+          isUser ? "bg-primary text-primary-foreground" : "bg-muted/80 text-muted-foreground",
         )}
         aria-hidden
       >
@@ -126,7 +134,7 @@ export function ChatMessage({ message, showStreamingCursor = false }: ChatMessag
           isUser ? "max-w-[85%] items-end sm:max-w-[75%]" : "items-start",
         )}
       >
-        <span className="text-xs font-medium text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground tracking-wide">
           {isUser ? copy.message.you : copy.message.assistant}
         </span>
 
@@ -143,9 +151,15 @@ export function ChatMessage({ message, showStreamingCursor = false }: ChatMessag
             )
           ) : (
             // アシスタント: 全パートを1つの応答ブロックとして統合表示
-            <div className="space-y-4 rounded-2xl bg-muted/80 px-4 py-3">
+            <div className="space-y-4 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-sm px-5 py-4 shadow-sm">
               {message.parts.map((part, index) =>
-                renderAssistantPart(part, message, index, showStreamingCursor),
+                renderAssistantPart(
+                  part,
+                  message,
+                  index,
+                  showStreamingCursor,
+                  activePhase,
+                ),
               )}
             </div>
           )}
@@ -198,22 +212,12 @@ function renderAssistantPart(
   message: AnyMessage,
   index: number,
   showStreamingCursor: boolean,
+  activePhase?: "searching" | "generating-ui",
 ): React.ReactNode {
   const type = part.type;
 
-  // フェーズインジケーター（検索中…、UI生成中…）
-  if (type === "data-phase" && part.data && typeof part.data === "object") {
-    const data = part.data as {
-      phase?: "searching" | "generating-ui" | "complete";
-      label?: string;
-    };
-    return (
-      <PhaseIndicator
-        key={(part.id as string) ?? `${message.id}-phase-${index}`}
-        data={data}
-      />
-    );
-  }
+  // data-phase は transient でレイアウトの onData で処理済み（ここでは描画しない）
+  if (type === "data-phase") return null;
 
   if (type === "text" && typeof part.text === "string") {
     const isLastPart = index === message.parts.length - 1;
@@ -236,8 +240,15 @@ function renderAssistantPart(
   }
 
   // ツールパート: AI SDK の tool-<name> + state パターンで統一レンダリング
+  // フェーズ表示中は ToolLoading を非表示（生成中UIを1つに統一）
   if (typeof type === "string" && type.startsWith("tool-")) {
-    return renderToolPart(part, type, `${message.id}-${type}-${index}`);
+    const suppressToolLoading = !!activePhase;
+    return renderToolPart(
+      part,
+      type,
+      `${message.id}-${type}-${index}`,
+      suppressToolLoading,
+    );
   }
 
   return null;
@@ -248,10 +259,12 @@ function renderToolPart(
   part: Record<string, unknown>,
   toolType: string,
   key: string,
+  suppressToolLoading: boolean,
 ): React.ReactNode {
   const label = getToolLoadingLabel(toolType);
 
   if (part.state === "input-streaming" || part.state === "input-available") {
+    if (suppressToolLoading) return null;
     return (
       <div key={key}>
         <ToolLoading label={label} />
@@ -295,12 +308,22 @@ const TOOL_OUTPUT_RENDERERS: Record<
     ),
   },
   "tool-showChart": {
-    render: (o) => (
-      <BarChart
-        title={(o.title as string | null) ?? undefined}
-        items={(o.items as { name: string; value: number; subtitle?: string }[]) ?? []}
-      />
-    ),
+    render: (o) => {
+      const items = (o.items as { name: string; value: number; subtitle?: string }[]) ?? [];
+      const chartType = (o.chartType as "bar" | "line" | "area" | "pie") ?? "bar";
+      const title = (o.title as string | null) ?? undefined;
+      const props = { title, items };
+      switch (chartType) {
+        case "line":
+          return <LineChartComponent {...props} />;
+        case "area":
+          return <AreaChartComponent {...props} />;
+        case "pie":
+          return <PieChartComponent {...props} />;
+        default:
+          return <BarChart {...props} />;
+      }
+    },
   },
   "tool-showTimeline": {
     render: (o) => (
