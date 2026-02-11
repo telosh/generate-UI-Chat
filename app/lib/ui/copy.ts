@@ -56,6 +56,9 @@ export const copy = {
     you: "あなた",
     assistant: "アシスタント",
   },
+  streaming: {
+    thinking: "考え中…",
+  },
   toolLoading: {
     showCards: "カードを生成中…",
     showChart: "チャートを生成中…",
