@@ -5,6 +5,10 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
+import {
+  DEFAULT_GEMINI_MODEL,
+  isValidGeminiModel,
+} from "@/app/lib/ai/models";
 import { buildSystemPrompt } from "@/app/lib/ai/system-prompt";
 import { chatTools } from "@/app/lib/ai/tools";
 import { getRateLimitClient } from "@/app/lib/ratelimit";
@@ -22,10 +26,16 @@ function getClientIp(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { messages, toolMode } = (await request.json()) as {
+    const { messages, toolMode, model: modelParam } = (await request.json()) as {
       messages: UIMessage[];
       toolMode?: "single" | "multiple";
+      model?: string;
     };
+
+    const model =
+      modelParam && isValidGeminiModel(modelParam)
+        ? modelParam
+        : DEFAULT_GEMINI_MODEL;
 
     const ratelimit = getRateLimitClient();
     if (ratelimit) {
@@ -67,7 +77,7 @@ export async function POST(request: Request) {
     const maxSteps = toolMode === "multiple" ? 5 : 1;
 
     const result = streamText({
-      model: google("gemini-2.5-flash"),
+      model: google(model),
       system: buildSystemPrompt(),
       messages: modelMessages,
       tools: chatTools,

@@ -30,6 +30,10 @@ export const copy = {
     singleDesc: "ツールを1回のみ呼び出し",
     multipleDesc: "ツールを複数回呼び出し可能",
   },
+  model: {
+    label: "モデル",
+    ariaLabel: "使用するAIモデルを選択",
+  },
   chat: {
     title: "Generative UI Demo",
     emptyState:
