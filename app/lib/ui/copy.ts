@@ -12,6 +12,19 @@ export const copy = {
     newChat: "新規チャット",
     footer: "Next.js, AI SDK & Vercel で構築",
   },
+  header: {
+    navLabel: "メインナビゲーション",
+    menuOpen: "メニューを開く",
+    menu: "メニュー",
+    toolsList: "一覧ページ",
+    mobileTitle: "genUIAI",
+  },
+  toolsNav: {
+    label: "ナビゲーション",
+  },
+  layout: {
+    skipToContent: "本文へスキップ",
+  },
   prompts: [
     "おすすめのフレームワークをカードで",
     "人気のプログラミング言語をチャートで",
@@ -23,12 +36,12 @@ export const copy = {
     "重要なメッセージを一言で",
   ] as const,
   searchPrompts: [
-    "今日の主要ニュースを教えて",
-    "最新のReactの情報を調べて",
-    "現在のビットコイン価格は？",
-    "Vercelの最新動向を教えて",
-    "Gemini APIの最近の更新は？",
-    "このURLの内容を要約して: https://vercel.com/blog",
+    "ビットコイン価格を調べてチャートで",
+    "今日の主要ニュースを表で",
+    "最新のReactの情報をカードで",
+    "仮想通貨の時価総額を比較して",
+    "Vercelの最新動向をまとめて",
+    "主要株価を指標で教えて",
   ] as const,
   toolMode: {
     single: "シングル（1回）",
@@ -40,9 +53,9 @@ export const copy = {
   searchMode: {
     label: "モード",
     ui: "UI生成",
-    search: "検索",
-    uiDesc: "カード・チャートなどUIを生成",
-    searchDesc: "Google検索・URL取得で最新情報",
+    search: "検索+UI",
+    uiDesc: "カード・チャートなどUIを生成（知識ベース）",
+    searchDesc: "最新情報を検索してUIに反映（株価・ニュース→チャート等）",
   },
   model: {
     label: "モデル",
@@ -53,7 +66,7 @@ export const copy = {
     emptyState:
       "チャットで質問すると、AI がカード・チャート・表・比較など様々なUIを動的に生成します。自由にプロンプトを試してください。",
     emptyStateSearch:
-      "検索モードでは、Google検索で最新情報を取得したり、URLを指定してページの内容を分析できます。",
+      "検索モードでは、最新情報を検索してそのデータをチャート・表などUIに反映します。株価・ニュース・技術動向などを試してください。",
     placeholder: "カード・チャート・表など、試したいプロンプトを入力…",
     placeholderSearch: "ニュース・株価・URLの要約など、検索したい内容を入力…",
     send: "送信",
@@ -78,6 +91,8 @@ export const copy = {
     thinking: "考え中…",
   },
   toolLoading: {
+    googleSearch: "検索中…",
+    urlContext: "URL取得中…",
     showCards: "カードを生成中…",
     showChart: "チャートを生成中…",
     showTimeline: "タイムラインを生成中…",
@@ -94,6 +109,7 @@ export const copy = {
   themeToggle: {
     dark: "ダーク",
     light: "ライト",
+    ariaLabel: (themeLabel: string) => `${themeLabel}モードに切り替える`,
   },
   contact: {
     title: "連絡先",

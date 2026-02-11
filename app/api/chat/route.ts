@@ -81,9 +81,10 @@ export async function POST(request: Request) {
       ? {
           googleSearch: googleTools.googleSearch({}),
           urlContext: googleTools.urlContext({}),
+          ...chatTools,
         }
       : chatTools;
-    const maxSteps = useSearch ? 1 : toolMode === "multiple" ? 5 : 1;
+    const maxSteps = useSearch ? 5 : toolMode === "multiple" ? 5 : 1;
 
     const result = streamText({
       model: google(model),

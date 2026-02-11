@@ -23,6 +23,8 @@ type AnyMessage = {
 };
 
 const TOOL_LOADING_KEYS = [
+  "googleSearch",
+  "urlContext",
   "showCards",
   "showChart",
   "showTimeline",
@@ -216,6 +218,19 @@ function renderAssistantPart(
         )}
       </div>
     );
+  }
+
+  if (type === "tool-googleSearch" || type === "tool-urlContext") {
+    if (
+      part.state === "input-streaming" ||
+      part.state === "input-available"
+    ) {
+      return (
+        <div key={`${message.id}-search-loading-${index}`}>
+          <ToolLoading label={getToolLoadingLabel(type)} />
+        </div>
+      );
+    }
   }
 
   if (type === "tool-showCards") {
