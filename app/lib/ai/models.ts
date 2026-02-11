@@ -13,14 +13,14 @@ export const GEMINI_MODELS = [
   {
     id: "gemini-2.5-flash",
     label: "Flash",
-    description: "バランス（推奨）",
-    disabled: true,
+    description: "バランス・Search対応",
+    disabled: false,
   },
   {
     id: "gemini-2.5-pro",
     label: "Pro",
-    description: "高精度・推論",
-    disabled: true,
+    description: "高精度・推論・Search対応",
+    disabled: false,
   },
   {
     id: "gemini-3-flash-preview",

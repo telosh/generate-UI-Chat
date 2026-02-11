@@ -16,12 +16,19 @@ export const copy = {
     "おすすめのフレームワークをカードで",
     "人気のプログラミング言語をチャートで",
     "Reactの歴史をタイムラインで",
-    "中野区の降水量を表で返して",
     "Next.js と Remix を比較して",
     "効率的な開発の手順を",
     "Web開発のベストプラクティス5つ",
     "TypeScriptのメリットを指標で",
     "重要なメッセージを一言で",
+  ] as const,
+  searchPrompts: [
+    "今日の主要ニュースを教えて",
+    "最新のReactの情報を調べて",
+    "現在のビットコイン価格は？",
+    "Vercelの最新動向を教えて",
+    "Gemini APIの最近の更新は？",
+    "このURLの内容を要約して: https://vercel.com/blog",
   ] as const,
   toolMode: {
     single: "シングル（1回）",
@@ -29,6 +36,13 @@ export const copy = {
     label: "ツール呼び出し",
     singleDesc: "ツールを1回のみ呼び出し",
     multipleDesc: "ツールを複数回呼び出し可能",
+  },
+  searchMode: {
+    label: "モード",
+    ui: "UI生成",
+    search: "検索",
+    uiDesc: "カード・チャートなどUIを生成",
+    searchDesc: "Google検索・URL取得で最新情報",
   },
   model: {
     label: "モデル",
@@ -38,12 +52,16 @@ export const copy = {
     title: "Generative UI Demo",
     emptyState:
       "チャットで質問すると、AI がカード・チャート・表・比較など様々なUIを動的に生成します。自由にプロンプトを試してください。",
+    emptyStateSearch:
+      "検索モードでは、Google検索で最新情報を取得したり、URLを指定してページの内容を分析できます。",
     placeholder: "カード・チャート・表など、試したいプロンプトを入力…",
+    placeholderSearch: "ニュース・株価・URLの要約など、検索したい内容を入力…",
     send: "送信",
     sending: "送信中…",
     inputLabel: "質問を入力",
     newChat: "新規チャット",
     startPrompt: "下のプロンプトを選ぶか、自由に質問を入力してください",
+    startPromptSearch: "下のプロンプトを選ぶか、検索したい内容を入力してください",
     quotaError:
       "リクエストが多すぎます。無料枠の制限に達しました。約1分後に再試行してください。",
     quotaErrorRetryIn: (seconds: number) =>
