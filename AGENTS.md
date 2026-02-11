@@ -90,3 +90,6 @@ Vercel Web Interface Guidelines に準拠: https://vercel.com/design/guidelines
 - `.cursor/rules/vercel-performance.mdc` — パフォーマンス
 - `.cursor/skills/ui-development/SKILL.md` — UI 開発
 - `.cursor/skills/vercel-performance/SKILL.md` — キャッシュ・画像
+- `.cursor/skills/ai-sdk-chat/SKILL.md` — AI SDK・チャット・ツール
+- `.cursor/skills/nextjs-app-router/SKILL.md` — App Router・ルーティング
+- `.cursor/skills/shadcn-radix/SKILL.md` — shadcn/ui・Radix コンポーネント
